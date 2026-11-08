@@ -1,6 +1,15 @@
 import '@testing-library/jest-dom/vitest';
+import 'fake-indexeddb/auto';
+import { beforeEach } from 'vitest';
+import { db } from '../src/services/db';
+import { useNotesStore } from '../src/store/notesStore';
 
-// fake-indexeddb is imported per test where needed.
+beforeEach(async () => {
+  await db.notes.clear();
+  localStorage.clear();
+  useNotesStore.setState({ notes: [], loaded: false });
+});
+
 // Provide a default matchMedia for jsdom.
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

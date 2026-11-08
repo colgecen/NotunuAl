@@ -65,7 +65,7 @@ CSS değişkenleri (açık: krem/kâğıt, koyu: koyu gri/lacivert), `data-theme
 Üst çubuk: sol **`+ Yeni Ekle`**, orta/geniş **arama çubuğu**, sağ **tema anahtarı**. Metinler `i18n/tr.ts`'de. Başlık **NotunuAl!**.
 **Test:** bileşenler render oluyor, butonlar erişilebilir (`aria-label`).
 
-### [ ] T04 — Not listesi (satır görünümü)
+### [x] T04 — Not listesi (satır görünümü)
 `NoteList` + `NoteRow`: **kalın başlık**, en sağda boşluk bırakılmış **küçük ve soluk açıklama** (tek satır, kırpılmış). Başlık rengi uygulanır. Son güncellenen üstte. Boş durum mesajı.
 **Test:** başlık kalın sınıfı, açıklama kırpma, sıralama, boş durum.
 **Kabul:** SPEC §2.3 ile birebir uyumlu.
