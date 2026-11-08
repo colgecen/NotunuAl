@@ -11,6 +11,7 @@ import { useUIStore } from '../store/uiStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { FONT_DISPLAY, FONT_STACKS } from '../theme/fonts';
 import { tr } from '../i18n/tr';
+import SaveAsMenu, { type ExportFormat } from './SaveAsMenu';
 import type { FontKey } from '../types';
 
 interface Props {
@@ -156,6 +157,12 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
     };
   }, []);
 
+  const exportSave = async (fmt: ExportFormat) => {
+    // T14 wires native save dialog.
+    void fmt;
+    void latestNote;
+  };
+
   const handleClose = async () => {
     clearTimer();
     const next = latestNote.current;
@@ -189,9 +196,7 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
         <button type="button" aria-label={tr.save} className="px-3 py-1 rounded border border-line text-fg" onClick={() => void flushSave()}>
           {tr.save}
         </button>
-        <button type="button" aria-label={tr.saveAs} className="px-3 py-1 rounded border border-line text-fg text-sm" onClick={() => {}}>
-          {tr.saveAs}
-        </button>
+        <SaveAsMenu onSelect={(fmt: ExportFormat) => void exportSave(fmt)} />
         <button type="button" aria-label={tr.back} className="px-3 py-1 rounded border border-line text-fg" onClick={() => void handleClose()}>
           {tr.back}
         </button>

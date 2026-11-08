@@ -116,7 +116,7 @@ Düzenleme ekranında ve listede silme (onay penceresi). (SPEC §7)
 
 ## Aşama 3 — Farklı Kaydet (dışa aktarma)
 
-### [ ] T11 — Dışa aktarma modeli + TXT
+### [x] T11 — Dışa aktarma modeli + TXT
 `export/model.ts` (TipTap JSON → `ExportDoc`), `txt.ts`, dosya adı temizleme. `Farklı Kaydet` menüsü iskeleti (5 seçenek).
 **Test:** model dönüşümü (kalın/italik/renk/vurgu), TXT içeriği, Türkçe karakterler, dosya adı temizleme.
 
