@@ -70,7 +70,7 @@ CSS değişkenleri (açık: krem/kâğıt, koyu: koyu gri/lacivert), `data-theme
 **Test:** başlık kalın sınıfı, açıklama kırpma, sıralama, boş durum.
 **Kabul:** SPEC §2.3 ile birebir uyumlu.
 
-### [ ] T05 — Kısayol kayıt defteri + arama + gezinme
+### [x] T05 — Kısayol kayıt defteri + arama + gezinme
 - `shortcuts/registry.ts` + `useShortcuts` (Ctrl+K'yı da buraya taşı)
 - **`.`** → aramaya odaklan (input/textarea/contenteditable içindeyken **tetiklenmez**)
 - `searchService` (Fuse.js, Türkçe normalize)

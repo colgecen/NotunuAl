@@ -23,7 +23,9 @@ export default function NoteList({ notes, selectedIndex = -1, onOpen, onNewNote 
   return (
     <div role="listbox" aria-label={tr.appTitle} className="overflow-y-auto">
       {notes.map((n, idx) => (
-        <NoteRow key={n.id} note={n} selected={idx === selectedIndex} onClick={onOpen} />
+        <div key={n.id} role="option" aria-selected={idx === selectedIndex}>
+          <NoteRow note={n} selected={idx === selectedIndex} onClick={onOpen} />
+        </div>
       ))}
     </div>
   );
