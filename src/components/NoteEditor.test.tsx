@@ -49,6 +49,14 @@ describe('NoteEditor', () => {
     expect(screen.getByRole('button', { name: 'Tarih ekle' })).toBeInTheDocument();
   });
 
+  it('exports txt and shows saved notice in web mode', async () => {
+    render(<NoteEditor noteId={null} onClose={() => {}} />);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Başlık' }), { target: { value: 'Dışa Aktar' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Farklı Kaydet' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Metin belgesi (.txt)' }));
+    expect(await screen.findByRole('status')).toHaveTextContent('Dosya kaydedildi');
+  });
+
   it('saves title color', async () => {
     render(<NoteEditor noteId={null} onClose={() => {}} />);
     fireEvent.change(await screen.findByRole('textbox', { name: 'Başlık' }), { target: { value: 'Renk' } });

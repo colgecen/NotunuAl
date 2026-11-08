@@ -129,9 +129,10 @@ Düzenleme ekranında ve listede silme (onay penceresi). (SPEC §7)
 **Test:** PDF başlığı/boyutu/sayfa sayısı; PPTX slayt sayısı ve metin; Türkçe karakter.
 _Bitiş notu:_ Liberation Sans TTF'leri `scripts/generate-pdf-fonts.mjs` ile base64 TS modülüne (`pdfFontData.ts`) gömüldü (CSP `connect-src 'none'` nedeniyle fetch yok). Dışa aktarma kütüphaneleri dinamik import ile ayrı chunk'ta (ana bundle ~714 kB). Testler: %PDF başlığı, gömülü font, tek/çok sayfa, PPTX zip içinde slayt sayısı + Türkçe metin + kalın çalıştırma. `exportSave` şimdilik web indirmesi kullanır; native diyalog T14'te.
 
-### [ ] T14 — Yerel kaydetme iletişim kutusu
+### [x] T14 — Yerel kaydetme iletişim kutusu
 `fileService` (Tauri `dialog.save` + `fs.writeFile`, web'de indirme yedeği), biçim filtreleri, varsayılan ad = başlık, hata/başarı bildirimi. Tauri izinleri **minimum** (`capabilities`).
 **Test:** `fileService` sahte (mock) Tauri API ile; iptal ve hata yolları.
+_Bitiş notu:_ `fileService.saveBytes(ad, bytes, biçim)` → `saved | cancelled | error`. Capability yalnız `core:default + dialog:allow-save + fs:allow-write-file` (seçilen yol dialog eklentisi tarafından çalışma zamanında fs kapsamına eklenir; statik scope gerekmez). Editörde `role="status"` ile kayıt/başarı bildirimi. 4 test: web indirme, Tauri kayıt, iptal, yazma hatası.
 
 ---
 
@@ -187,4 +188,4 @@ Odak halkası, `aria-*`, klavye ile tüm akış, kontrast (iki temada), animasyo
 
 > Bir görev ilerleyemiyorsa nedenini ve denediklerini yaz.
 
-_(boş)_
+- **Cargo kontrolleri yerel makinede çalışmıyor:** `src-tauri` için `cargo check`, eksik sistem kütüphaneleri (`webkit2gtk4.1` / `libsoup-3.0` `.pc` dosyaları, `PKG_CONFIG_PATH` boş) nedeniyle derleme aşamasına gelemiyor. Kod/izin değişikliği yok; `pnpm verify` web tarafını kapsıyor. Fedora/Arch geliştirme ortamında (AGENTS.md §8 paketleriyle) `cd src-tauri && cargo check` ayrıca çalıştırılmalı.

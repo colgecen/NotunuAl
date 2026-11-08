@@ -1,12 +1,11 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default permissions",
+  "description": "Minimum permissions: native save dialog + write chosen file",
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "dialog:default",
-    "fs:allow-write-file",
-    "fs:allow-read-file"
+    "dialog:allow-save",
+    "fs:allow-write-file"
   ]
 }

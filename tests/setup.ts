@@ -30,6 +30,13 @@ if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {};
 }
 
+if (!URL.createObjectURL) {
+  URL.createObjectURL = () => 'blob:mock';
+}
+if (!URL.revokeObjectURL) {
+  URL.revokeObjectURL = () => {};
+}
+
 // Provide a default matchMedia for jsdom.
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

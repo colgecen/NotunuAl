@@ -27,6 +27,7 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
   const [loaded, setLoaded] = useState(!noteId);
   const [dirty, setDirty] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const latestNote = useRef(note);
   const dirtyRef = useRef(false);
@@ -162,11 +163,18 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
   const exportSave = async (fmt: ExportFormat) => {
     await flushSave();
     const note = latestNote.current;
-    const { EXPORT_EXTENSIONS, EXPORT_MIME, downloadBytes, exportNote } =
-      await import('../services/export');
-    const bytes = await exportNote(note, fmt);
-    const name = `${cleanFileName(note.title)}.${EXPORT_EXTENSIONS[fmt]}`;
-    downloadBytes(name, bytes, EXPORT_MIME[fmt]);
+    try {
+      const { EXPORT_EXTENSIONS, exportNote } = await import('../services/export');
+      const { saveBytes } = await import('../services/fileService');
+      const bytes = await exportNote(note, fmt);
+      const name = `${cleanFileName(note.title)}.${EXPORT_EXTENSIONS[fmt]}`;
+      const outcome = await saveBytes(name, bytes, fmt);
+      if (outcome.status === 'saved') setNotice(tr.exportSaved);
+      else if (outcome.status === 'error') setNotice(`${tr.exportError}: ${outcome.message ?? ''}`);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      setNotice(`${tr.exportError}: ${detail}`);
+    }
   };
 
   const handleClose = async () => {
@@ -216,6 +224,11 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
         </button>
         {dirty ? <span aria-label="Kaydedilmemiş değişiklik" className="ml-1">{tr.dirty}</span> : null}
         {savedFlash ? <span className="text-xs text-muted ml-2">{tr.saved}</span> : null}
+        {notice ? (
+          <span role="status" className="text-xs text-muted ml-2">
+            {notice}
+          </span>
+        ) : null}
       </div>
 
       <input

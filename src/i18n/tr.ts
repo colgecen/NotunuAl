@@ -11,6 +11,8 @@ export const tr = {
   bodyPlaceholder: 'Notunuzu yazın...',
   dirty: '●',
   saved: 'Kaydedildi',
+  exportSaved: 'Dosya kaydedildi',
+  exportError: 'Dosya kaydedilemedi',
   delete: 'Sil',
   deleteConfirm: 'Bu not kalıcı olarak silinecek. Emin misiniz?',
   cancel: 'İptal',
