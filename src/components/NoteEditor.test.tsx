@@ -11,7 +11,7 @@ describe('NoteEditor', () => {
 
   it('persists a note with title on close', async () => {
     render(<NoteEditor noteId={null} onClose={() => {}} />);
-    fireEvent.change(screen.getByRole('textbox', { name: 'Başlık' }), { target: { value: 'Toplantı' } });
+    fireEvent.change(await screen.findByRole('textbox', { name: 'Başlık' }), { target: { value: 'Toplantı' } });
     fireEvent.click(screen.getByRole('button', { name: 'Geri' }));
     await waitFor(async () => {
       const notes = await listNotes();
@@ -20,18 +20,25 @@ describe('NoteEditor', () => {
   });
 
   it('deletes an existing note when emptied on close', async () => {
-    const note = createNote({ title: 'Dolu', bodyText: 'içerik' });
+    const note = createNote({ title: 'Dolu' });
     await saveNote(note);
     render(<NoteEditor noteId={note.id} onClose={() => {}} />);
-    fireEvent.change(screen.getByRole('textbox', { name: 'Başlık' }), { target: { value: '' } });
-    fireEvent.change(screen.getByRole('textbox', { name: 'Notunuzu yazın...' }), { target: { value: '' } });
+    fireEvent.change(await screen.findByRole('textbox', { name: 'Başlık' }), { target: { value: '' } });
     fireEvent.click(screen.getByRole('button', { name: 'Geri' }));
     await waitFor(async () => expect(await getNote(note.id)).toBeUndefined());
   });
 
+  it('adds and removes date', async () => {
+    render(<NoteEditor noteId={null} onClose={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Tarih ekle' }));
+    expect(screen.getByLabelText('Tarih')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Tarihi kaldır' }));
+    expect(screen.getByRole('button', { name: 'Tarih ekle' })).toBeInTheDocument();
+  });
+
   it('saves title color', async () => {
     render(<NoteEditor noteId={null} onClose={() => {}} />);
-    fireEvent.change(screen.getByRole('textbox', { name: 'Başlık' }), { target: { value: 'Renk' } });
+    fireEvent.change(await screen.findByRole('textbox', { name: 'Başlık' }), { target: { value: 'Renk' } });
     fireEvent.change(screen.getByLabelText('Başlık rengi seç'), { target: { value: '#ff0000' } });
     fireEvent.click(screen.getByRole('button', { name: 'Geri' }));
     await waitFor(async () => {

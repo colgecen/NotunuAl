@@ -23,3 +23,22 @@
 html, body, #root { height: 100%; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, sans-serif; }
 *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.tiptap {
+  padding: 0.75rem;
+  min-height: 220px;
+  outline: none;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--muted);
+  cursor: text;
+  height: 0;
+}
+
+.tiptap mark {
+  padding: 0 0.125rem;
+  border-radius: 0.125rem;
+}

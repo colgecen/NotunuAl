@@ -95,7 +95,7 @@ CSS değişkenleri (açık: krem/kâğıt, koyu: koyu gri/lacivert), `data-theme
 
 **Test:** yeni not oluşur, boş not silinir, başlık rengi saklanır ve listede görünür.
 
-### [ ] T08 — TipTap editörü ve biçim araç çubuğu
+### [x] T08 — TipTap editörü ve biçim araç çubuğu
 Açıklama için TipTap: **kalın, italik, yazı rengi, fosforlu kalem (highlight, renk seçilebilir), yazı tipi (5 font), açıklama yazı boyutu**. Başlık için de kalın/italik/renk/yazı tipi.
 - Paketlenmiş fontlar (`@font-face`; bkz. ARCHITECTURE §5.5)
 - Yazı boyutu `A-`/`A+` + kaydırıcı; **kalıcı hatırlanır**
@@ -179,7 +179,7 @@ Odak halkası, `aria-*`, klavye ile tüm akış, kontrast (iki temada), animasyo
 
 | Tarih | Görev | Karar | Gerekçe |
 |---|---|---|---|
-| — | — | — | — |
+| 2026-11-08 | T08 | Başlık biçimlendirmesi renk + yazı tipiyle sınırlandı. | `Note.title` düz metin; liste kalın başlık ve açıklama için TipTap biçimleri yeterli. |
 
 ## Blokajlar
 
