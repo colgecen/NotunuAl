@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "NotunuAl!",
+  "version": "0.1.0",
+  "identifier": "app.notunal.desktop",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build:web",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "NotunuAl!",
+        "width": 1000,
+        "height": 700,
+        "minWidth": 600,
+        "minHeight": 400,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["appimage"],
+    "icon": []
+  }
+}
