@@ -120,7 +120,7 @@ Düzenleme ekranında ve listede silme (onay penceresi). (SPEC §7)
 `export/model.ts` (TipTap JSON → `ExportDoc`), `txt.ts`, dosya adı temizleme. `Farklı Kaydet` menüsü iskeleti (5 seçenek).
 **Test:** model dönüşümü (kalın/italik/renk/vurgu), TXT içeriği, Türkçe karakterler, dosya adı temizleme.
 
-### [ ] T12 — DOCX ve XLSX
+### [x] T12 — DOCX ve XLSX
 `docx.ts` (biçim korunur, gerçek font adları), `xlsx.ts` (A1 başlık, A2 açıklama, A3 tarih).
 **Test:** üretilen zip açılıp metin/biçim doğrulanır; Türkçe karakter.
 
