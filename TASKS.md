@@ -124,9 +124,10 @@ Düzenleme ekranında ve listede silme (onay penceresi). (SPEC §7)
 `docx.ts` (biçim korunur, gerçek font adları), `xlsx.ts` (A1 başlık, A2 açıklama, A3 tarih).
 **Test:** üretilen zip açılıp metin/biçim doğrulanır; Türkçe karakter.
 
-### [ ] T13 — PDF ve PPTX
+### [x] T13 — PDF ve PPTX
 `pdf.ts` (**gömülü TTF**, Türkçe karakter, renk/kalın/italik, sayfa bölme), `pptx.ts` (başlık slaytı + taşan gövdeyi ek slaytlara böl).
 **Test:** PDF başlığı/boyutu/sayfa sayısı; PPTX slayt sayısı ve metin; Türkçe karakter.
+_Bitiş notu:_ Liberation Sans TTF'leri `scripts/generate-pdf-fonts.mjs` ile base64 TS modülüne (`pdfFontData.ts`) gömüldü (CSP `connect-src 'none'` nedeniyle fetch yok). Dışa aktarma kütüphaneleri dinamik import ile ayrı chunk'ta (ana bundle ~714 kB). Testler: %PDF başlığı, gömülü font, tek/çok sayfa, PPTX zip içinde slayt sayısı + Türkçe metin + kalın çalıştırma. `exportSave` şimdilik web indirmesi kullanır; native diyalog T14'te.
 
 ### [ ] T14 — Yerel kaydetme iletişim kutusu
 `fileService` (Tauri `dialog.save` + `fs.writeFile`, web'de indirme yedeği), biçim filtreleri, varsayılan ad = başlık, hata/başarı bildirimi. Tauri izinleri **minimum** (`capabilities`).
@@ -180,6 +181,7 @@ Odak halkası, `aria-*`, klavye ile tüm akış, kontrast (iki temada), animasyo
 | Tarih | Görev | Karar | Gerekçe |
 |---|---|---|---|
 | 2026-11-08 | T08 | Başlık biçimlendirmesi renk + yazı tipiyle sınırlandı. | `Note.title` düz metin; liste kalın başlık ve açıklama için TipTap biçimleri yeterli. |
+| 2026-11-08 | T13 | PDF fontları TTF yerine base64 TS modülü olarak gömüldü; export kütüphaneleri dinamik import chunk. | CSP `connect-src 'none'` fetch'i engeller; ana bundle açılış hızı korunur. |
 
 ## Blokajlar
 

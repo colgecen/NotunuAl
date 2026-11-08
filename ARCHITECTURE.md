@@ -171,7 +171,7 @@ interface Run { text: string; bold?: boolean; italic?: boolean;
 - `model.ts` TipTap düğümlerini gezip `Run` listesine çevirir. **Tek yerde** test edilir; format yazıcıları bunu tüketir.
 - **TXT:** başlık, boş satır, düz metin (+ tarih).
 - **DOCX:** `docx` kütüphanesi; `TextRun` ile bold/italic/color/highlight/font/size.
-- **PDF:** `jspdf`; gömülü TTF (Türkçe karakter için **şart**, standart PDF fontları ş/ğ/İ'yi göstermez); renk/kalınlık/italik destekler, sayfa taşmasını böler.
+- **PDF:** `jspdf`; gömülü TTF (Türkçe karakter için **şart**, standart PDF fontları ş/ğ/İ'yi göstermez); renk/kalınlık/italik destekler, sayfa taşmasını böler. Liberation Sans TTF'leri `scripts/generate-pdf-fonts.mjs` ile `src/services/export/pdfFontData.ts` içine base64 gömülür (CSP fetch'i engeller).
 - **PPTX:** `pptxgenjs`; slayt 1: başlık (+ tarih); gövde slayta sığmazsa paragraf bazında ek slaytlara bölünür.
 - **XLSX:** SheetJS; `A1` başlık, `A2` açıklama (düz metin), `A3` tarih; sütun genişliği ve satır kaydırma ayarlı.
 - `fileService.save(bytes, defaultName, filters)`: Tauri'de native diyalog + `writeFile`; web (geliştirme) ortamında `Blob` indirme yedeği.

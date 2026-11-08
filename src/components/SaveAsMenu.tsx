@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { tr } from '../i18n/tr';
-
-export type ExportFormat = 'xlsx' | 'docx' | 'pptx' | 'pdf' | 'txt';
+import type { ExportFormat } from '../services/export';
 
 interface Props {
   onSelect: (format: ExportFormat) => void;

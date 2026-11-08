@@ -11,7 +11,9 @@ import { useUIStore } from '../store/uiStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { FONT_DISPLAY, FONT_STACKS } from '../theme/fonts';
 import { tr } from '../i18n/tr';
-import SaveAsMenu, { type ExportFormat } from './SaveAsMenu';
+import SaveAsMenu from './SaveAsMenu';
+import type { ExportFormat } from '../services/export';
+import { cleanFileName } from '../services/export/txt';
 import type { FontKey } from '../types';
 
 interface Props {
@@ -158,9 +160,13 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
   }, []);
 
   const exportSave = async (fmt: ExportFormat) => {
-    // T14 wires native save dialog.
-    void fmt;
-    void latestNote;
+    await flushSave();
+    const note = latestNote.current;
+    const { EXPORT_EXTENSIONS, EXPORT_MIME, downloadBytes, exportNote } =
+      await import('../services/export');
+    const bytes = await exportNote(note, fmt);
+    const name = `${cleanFileName(note.title)}.${EXPORT_EXTENSIONS[fmt]}`;
+    downloadBytes(name, bytes, EXPORT_MIME[fmt]);
   };
 
   const handleClose = async () => {
