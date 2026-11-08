@@ -4,6 +4,7 @@ import { beforeEach } from 'vitest';
 import { db } from '../src/services/db';
 import { useNotesStore } from '../src/store/notesStore';
 import { useUIStore } from '../src/store/uiStore';
+import { useSettingsStore } from '../src/store/settingsStore';
 
 beforeEach(async () => {
   await db.notes.clear();
@@ -17,6 +18,7 @@ beforeEach(async () => {
     activeNoteId: null,
     searchInputRef: null,
   });
+  useSettingsStore.setState({ theme: 'light', viewMode: 'rows', bodyFontSize: 16, bodyFont: 'arial' });
 });
 
 if (!Element.prototype.scrollIntoView) {

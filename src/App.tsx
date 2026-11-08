@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import TopBar from './components/TopBar';
 import NoteList from './components/NoteList';
+import NoteGrid from './components/NoteGrid';
+import ViewModeSwitch from './components/ViewModeSwitch';
+import { useSettingsStore } from './store/settingsStore';
 import { useNotesStore } from './store/notesStore';
 import { useUIStore } from './store/uiStore';
 import { useShortcuts } from './shortcuts/useShortcuts';
@@ -18,6 +21,7 @@ export default function App() {
   const selectedIndex = useUIStore((s) => s.selectedIndex);
   const openNote = useUIStore((s) => s.openNote);
   const openNewNote = useUIStore((s) => s.openNewNote);
+  const viewMode = useSettingsStore((s) => s.viewMode);
 
   useShortcuts();
 
@@ -46,13 +50,23 @@ export default function App() {
         onNewNote={openNewNote}
         searchRef={searchRef}
       />
-      <main className="flex-1 overflow-hidden">
-        <NoteList
-          notes={results}
-          selectedIndex={selectedIndex}
-          onOpen={openNote}
-          onNewNote={openNewNote}
-        />
+      <main className="flex-1 overflow-hidden flex flex-col">
+        <ViewModeSwitch />
+        {viewMode === 'icons' ? (
+          <NoteGrid
+            notes={results}
+            selectedIndex={selectedIndex}
+            onOpen={openNote}
+            onNewNote={openNewNote}
+          />
+        ) : (
+          <NoteList
+            notes={results}
+            selectedIndex={selectedIndex}
+            onOpen={openNote}
+            onNewNote={openNewNote}
+          />
+        )}
       </main>
     </div>
   );

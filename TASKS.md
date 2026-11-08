@@ -79,7 +79,7 @@ CSS değişkenleri (açık: krem/kâğıt, koyu: koyu gri/lacivert), `data-theme
 **Test:** `.` odaklanır; metin alanında nokta yazılır; ilk öğe seçili; ↓↓↑ doğru indeks; Enter doğru id'yi açar; `İ/ı` aramaları; boş sorguda tüm liste.
 **Kabul:** SPEC §2.2 ve §6 tablosu.
 
-### [ ] T06 — Görünüm modları
+### [x] T06 — Görünüm modları
 `ViewModeSwitch` ("açıklama" üstündeki ayar çubuğu): **satır / simge / ana hal**. `NoteGrid` (simge). Seçim **otomatik kaydedilir ve hatırlanır**.
 **Test:** mod değişimi, kalıcılık, yeniden açılışta aynı mod.
 
