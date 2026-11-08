@@ -49,7 +49,7 @@ Tauri v2 + Vite + React + TypeScript (strict) + Tailwind + pnpm.
 **Test:** CRUD, `updatedAt` sıralaması, silme, bozuk ayar JSON'unda varsayılana dönüş.
 **Kabul:** testler yeşil; UI'dan bağımsız çalışır.
 
-### [ ] T02 — Tema sistemi
+### [x] T02 — Tema sistemi
 CSS değişkenleri (açık: krem/kâğıt, koyu: koyu gri/lacivert), `data-theme`, `settingsStore.theme`, ilk açılışta sistem teması, kalıcılık, ilk boyamada yanıp sönme yok.
 - `ThemeToggle` bileşeni (güneş/ay, toggle görünümlü)
 - **Ctrl+K** ile geçiş (geçici basit dinleyici; T05'te registry'ye taşınacak)
