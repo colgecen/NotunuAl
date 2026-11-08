@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { listNotes } from '../services/noteRepo';
 import App from '../App';
 import { useNotesStore } from '../store/notesStore';
 import { useUIStore } from '../store/uiStore';
@@ -50,6 +51,15 @@ describe('shortcuts', () => {
     expect(useUIStore.getState().selectedIndex).toBe(1);
     fireEvent.keyDown(window, { key: 'Enter' });
     expect(useUIStore.getState().activeNoteId).toBe('b');
+  });
+
+  it('saves note with Ctrl+S', async () => {
+    render(<App />);
+    fireEvent.click(screen.getAllByRole('button', { name: '+ Yeni Ekle' })[0]);
+    const title = await screen.findByRole('textbox', { name: 'Başlık' });
+    fireEvent.change(title, { target: { value: 'Kısayol' } });
+    fireEvent.keyDown(window, { key: 's', ctrlKey: true });
+    await waitFor(async () => expect((await listNotes()).some((n) => n.title === 'Kısayol')).toBe(true));
   });
 
   it('clears search on Esc when query present', async () => {

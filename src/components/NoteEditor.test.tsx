@@ -19,6 +19,19 @@ describe('NoteEditor', () => {
     });
   });
 
+  it('autosaves dirty note after debounce', async () => {
+    render(<NoteEditor noteId={null} onClose={() => {}} />);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Başlık' }), { target: { value: 'Otomatik' } });
+    expect(screen.getByLabelText('Kaydedilmemiş değişiklik')).toBeInTheDocument();
+    await waitFor(
+      async () => {
+        const notes = await listNotes();
+        expect(notes.some((n) => n.title === 'Otomatik')).toBe(true);
+      },
+      { timeout: 2000 },
+    );
+  });
+
   it('deletes an existing note when emptied on close', async () => {
     const note = createNote({ title: 'Dolu' });
     await saveNote(note);

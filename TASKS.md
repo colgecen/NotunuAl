@@ -104,7 +104,7 @@ Açıklama için TipTap: **kalın, italik, yazı rengi, fosforlu kalem (highligh
 
 **Test:** işaretler JSON'a doğru yazılıyor; font/boyut/renk uygulanıyor; tarih ekle/kaldır.
 
-### [ ] T09 — Kaydet ve otomatik kayıt
+### [x] T09 — Kaydet ve otomatik kayıt
 `Kaydet` butonu + **Ctrl+S**; ~800 ms debounce otomatik kayıt; "●" kirli işareti, "Kaydedildi" bildirimi; çıkışta bekleyen kaydı flush.
 **Test:** sahte zamanlayıcı ile debounce, flush, kirli durum göstergesi, veri kalıcılığı (yeniden yükle).
 

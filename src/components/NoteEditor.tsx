@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
@@ -7,6 +7,7 @@ import type { Note } from '../types';
 import { createNote, getNote, saveNote, deleteNote } from '../services/noteRepo';
 import { extractBodyText } from '../services/textUtils';
 import { useNotesStore } from '../store/notesStore';
+import { useUIStore } from '../store/uiStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { FONT_DISPLAY, FONT_STACKS } from '../theme/fonts';
 import { tr } from '../i18n/tr';
@@ -20,12 +21,67 @@ interface Props {
 export default function NoteEditor({ noteId, onClose }: Props) {
   const [note, setNote] = useState<Note>(() => createNote({ id: noteId ?? undefined }));
   const [loaded, setLoaded] = useState(!noteId);
+  const [dirty, setDirty] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
+  const latestNote = useRef(note);
+  const dirtyRef = useRef(false);
+  const timerRef = useRef<number | null>(null);
+  const mountedRef = useRef(true);
   const refresh = useNotesStore((s) => s.load);
+  const registerSaveHandler = useUIStore((s) => s.registerSaveHandler);
   const bodyFontSize = useSettingsStore((s) => s.bodyFontSize);
   const bodyFont = useSettingsStore((s) => s.bodyFont);
   const setBodyFontSize = useSettingsStore((s) => s.setBodyFontSize);
+
+  function clearTimer() {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }
+
+  const doPersist = useCallback(
+    async (next: Note) => {
+      const saved = await saveNote(next);
+      if (mountedRef.current) {
+        latestNote.current = saved;
+        dirtyRef.current = false;
+        setNote(saved);
+        setDirty(false);
+        setSavedFlash(true);
+        window.setTimeout(() => {
+          if (mountedRef.current) setSavedFlash(false);
+        }, 1200);
+      }
+      await refresh();
+      return saved;
+    },
+    [refresh],
+  );
+
+  const flushSave = useCallback(() => {
+    clearTimer();
+    const next = latestNote.current;
+    const empty = !next.title.trim() && !extractBodyText(next.body).trim();
+    if (!dirtyRef.current || empty) return Promise.resolve(next);
+    return doPersist(next);
+  }, [doPersist]);
+
+  const flushSaveRef = useRef(flushSave);
+  useEffect(() => {
+    flushSaveRef.current = flushSave;
+  }, [flushSave]);
+
+  function markDirty(next: Note) {
+    latestNote.current = next;
+    dirtyRef.current = true;
+    setDirty(true);
+    clearTimer();
+    timerRef.current = window.setTimeout(() => {
+      void flushSave();
+    }, 800);
+  }
 
   const editor = useEditor({
     extensions: [
@@ -42,7 +98,9 @@ export default function NoteEditor({ noteId, onClose }: Props) {
     },
     onUpdate: ({ editor: ed }) => {
       const body = ed.getJSON();
-      setNote((prev) => ({ ...prev, body, bodyText: extractBodyText(body) }));
+      const next = { ...latestNote.current, body, bodyText: extractBodyText(body) };
+      setNote(next);
+      markDirty(next);
     },
   });
 
@@ -52,7 +110,11 @@ export default function NoteEditor({ noteId, onClose }: Props) {
     void getNote(noteId).then((found) => {
       if (cancelled) return;
       const next = found ?? createNote({ id: noteId });
+      clearTimer();
+      latestNote.current = next;
+      dirtyRef.current = false;
       setNote(next);
+      setDirty(false);
       if (editor) editor.commands.setContent(next.body);
       setLoaded(true);
     });
@@ -73,21 +135,35 @@ export default function NoteEditor({ noteId, onClose }: Props) {
     });
   }, [editor, bodyFont, bodyFontSize, loaded]);
 
-  const persist = async (next: Note) => {
-    const saved = await saveNote(next);
-    setNote(saved);
-    await refresh();
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 1200);
-  };
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    registerSaveHandler(async () => {
+      await flushSaveRef.current();
+    });
+    return () => registerSaveHandler(null);
+  }, [registerSaveHandler]);
+
+  useEffect(() => {
+    return () => {
+      clearTimer();
+    };
+  }, []);
 
   const handleClose = async () => {
-    const empty = !note.title.trim() && !extractBodyText(note.body).trim();
-    const existed = (await getNote(note.id)) !== undefined;
+    clearTimer();
+    const next = latestNote.current;
+    const empty = !next.title.trim() && !extractBodyText(next.body).trim();
+    const existed = (await getNote(next.id)) !== undefined;
     if (empty) {
-      if (existed) await deleteNote(note.id);
-    } else {
-      await persist(note);
+      if (existed) await deleteNote(next.id);
+    } else if (dirtyRef.current) {
+      await doPersist(next);
     }
     onClose();
   };
@@ -109,7 +185,7 @@ export default function NoteEditor({ noteId, onClose }: Props) {
   return (
     <div className="h-full flex flex-col p-4 gap-2 overflow-auto">
       <div className="flex gap-2 items-center">
-        <button type="button" aria-label={tr.save} className="px-3 py-1 rounded border border-line text-fg" onClick={() => void persist(note)}>
+        <button type="button" aria-label={tr.save} className="px-3 py-1 rounded border border-line text-fg" onClick={() => void flushSave()}>
           {tr.save}
         </button>
         <button type="button" aria-label={tr.saveAs} className="px-3 py-1 rounded border border-line text-fg text-sm" onClick={() => {}}>
@@ -121,6 +197,7 @@ export default function NoteEditor({ noteId, onClose }: Props) {
         <button type="button" aria-label={tr.delete} className="px-3 py-1 rounded border border-line text-red-500" onClick={() => {}}>
           {tr.delete}
         </button>
+        {dirty ? <span aria-label="Kaydedilmemiş değişiklik" className="ml-1">{tr.dirty}</span> : null}
         {savedFlash ? <span className="text-xs text-muted ml-2">{tr.saved}</span> : null}
       </div>
 
@@ -131,7 +208,11 @@ export default function NoteEditor({ noteId, onClose }: Props) {
         aria-label={tr.titlePlaceholder}
         placeholder={tr.titlePlaceholder}
         value={note.title}
-        onChange={(e) => setNote({ ...note, title: e.target.value })}
+        onChange={(e) => {
+          const next = { ...note, title: e.target.value };
+          setNote(next);
+          markDirty(next);
+        }}
         className="text-2xl font-bold bg-transparent border-b-2 border-line pb-1 outline-none"
         style={{ color: note.titleColor ?? undefined, fontFamily: note.titleFont ? FONT_STACKS[note.titleFont] : undefined }}
       />
@@ -142,9 +223,11 @@ export default function NoteEditor({ noteId, onClose }: Props) {
             aria-label="Başlık yazı tipi"
             className="ml-1 p-1 rounded border border-line bg-paper text-fg"
             value={note.titleFont ?? ''}
-            onChange={(e) =>
-              setNote({ ...note, titleFont: (e.target.value || null) as FontKey | null })
-            }
+            onChange={(e) => {
+              const next = { ...note, titleFont: (e.target.value || null) as FontKey | null };
+              setNote(next);
+              markDirty(next);
+            }}
           >
             <option value="">Tema</option>
             {(Object.keys(FONT_DISPLAY) as FontKey[]).map((f) => (
@@ -160,10 +243,22 @@ export default function NoteEditor({ noteId, onClose }: Props) {
             type="color"
             aria-label="Başlık rengi seç"
             value={note.titleColor ?? '#000000'}
-            onChange={(e) => setNote({ ...note, titleColor: e.target.value })}
+            onChange={(e) => {
+              const next = { ...note, titleColor: e.target.value };
+              setNote(next);
+              markDirty(next);
+            }}
             className="h-6 w-10 ml-1"
           />
-          <button type="button" className="underline ml-1" onClick={() => setNote({ ...note, titleColor: null })}>
+          <button
+            type="button"
+            className="underline ml-1"
+            onClick={() => {
+              const next = { ...note, titleColor: null };
+              setNote(next);
+              markDirty(next);
+            }}
+          >
             Temizle
           </button>
         </label>
@@ -245,10 +340,22 @@ export default function NoteEditor({ noteId, onClose }: Props) {
               type="date"
               aria-label="Tarih"
               value={note.date}
-              onChange={(e) => setNote({ ...note, date: e.target.value || null })}
+              onChange={(e) => {
+                const next = { ...note, date: e.target.value || null };
+                setNote(next);
+                markDirty(next);
+              }}
               className="p-1 rounded border border-line bg-paper text-fg"
             />
-            <button type="button" className="underline text-sm" onClick={() => setNote({ ...note, date: null })}>
+            <button
+              type="button"
+              className="underline text-sm"
+              onClick={() => {
+                const next = { ...note, date: null };
+                setNote(next);
+                markDirty(next);
+              }}
+            >
               {tr.removeDate}
             </button>
           </>
@@ -256,7 +363,11 @@ export default function NoteEditor({ noteId, onClose }: Props) {
           <button
             type="button"
             className="text-sm underline"
-            onClick={() => setNote({ ...note, date: new Date().toISOString().slice(0, 10) })}
+            onClick={() => {
+              const next = { ...note, date: new Date().toISOString().slice(0, 10) };
+              setNote(next);
+              markDirty(next);
+            }}
           >
             {tr.addDate}
           </button>

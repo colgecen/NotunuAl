@@ -32,8 +32,9 @@ export const shortcuts: Shortcut[] = [
   {
     keys: 'ctrl+s',
     when: () => useUIStore.getState().screen === 'editor',
-    run: () => {
-      // T09 implements save flush
+    run: (ctx) => {
+      ctx.event.preventDefault();
+      void useUIStore.getState().save();
     },
   },
   {

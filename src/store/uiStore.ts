@@ -18,6 +18,9 @@ interface UIState {
   openNote: (id: string) => void;
   openNewNote: () => void;
   closeEditor: () => void;
+  saveHandler: (() => Promise<void>) | null;
+  registerSaveHandler: (handler: (() => Promise<void>) | null) => void;
+  save: () => Promise<void>;
   focusSearch: () => void;
   searchInputRef: RefObject<HTMLInputElement | null> | null;
   registerSearchRef: (ref: RefObject<HTMLInputElement | null> | null) => void;
@@ -49,6 +52,11 @@ export const useUIStore = create<UIState>((set, get) => ({
   openNote: (id) => set({ activeNoteId: id, screen: 'editor' }),
   openNewNote: () => set({ activeNoteId: null, screen: 'editor' }),
   closeEditor: () => set({ screen: 'list', activeNoteId: null }),
+  saveHandler: null,
+  registerSaveHandler: (handler) => set({ saveHandler: handler }),
+  save: async () => {
+    await get().saveHandler?.();
+  },
   focusSearch: () => get().searchInputRef?.current?.focus(),
   registerSearchRef: (ref) => set({ searchInputRef: ref }),
 }));

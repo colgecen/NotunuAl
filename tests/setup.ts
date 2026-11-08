@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import 'fake-indexeddb/auto';
-import { beforeEach } from 'vitest';
+import { afterEach, beforeEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
 import { db } from '../src/services/db';
 import { useNotesStore } from '../src/store/notesStore';
 import { useUIStore } from '../src/store/uiStore';
@@ -19,6 +20,10 @@ beforeEach(async () => {
     searchInputRef: null,
   });
   useSettingsStore.setState({ theme: 'light', viewMode: 'rows', bodyFontSize: 16, bodyFont: 'arial' });
+});
+
+afterEach(() => {
+  cleanup();
 });
 
 if (!Element.prototype.scrollIntoView) {
