@@ -41,7 +41,7 @@ Tauri v2 + Vite + React + TypeScript (strict) + Tailwind + pnpm.
 **Kabul:** `pnpm verify` yeşil; `pnpm tauri dev` pencere açıyor; boş sayfada "NotunuAl!" yazıyor.
 **Commit:** `chore(init): scaffold Tauri + React + TS project with verify script [T00]`
 
-### [ ] T01 — Veri katmanı
+### [x] T01 — Veri katmanı
 `src/types.ts`, Dexie şeması (`db.ts`), `noteRepo` (create, get, update/upsert, delete, list sıralı), `settingsService` (varsayılan + okuma hatasına dayanıklı).
 - uuid üretimi, `createdAt`/`updatedAt` yönetimi
 - `bodyText` türetme yardımcısı (TipTap JSON → düz metin)
