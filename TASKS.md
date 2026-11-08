@@ -108,7 +108,7 @@ Açıklama için TipTap: **kalın, italik, yazı rengi, fosforlu kalem (highligh
 `Kaydet` butonu + **Ctrl+S**; ~800 ms debounce otomatik kayıt; "●" kirli işareti, "Kaydedildi" bildirimi; çıkışta bekleyen kaydı flush.
 **Test:** sahte zamanlayıcı ile debounce, flush, kirli durum göstergesi, veri kalıcılığı (yeniden yükle).
 
-### [ ] T10 — Not silme
+### [x] T10 — Not silme
 Düzenleme ekranında ve listede silme (onay penceresi). (SPEC §7)
 **Test:** onaylı silme, vazgeç.
 

@@ -1,4 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import ConfirmDialog from './components/ConfirmDialog';
+import { tr } from './i18n/tr';
 import TopBar from './components/TopBar';
 import NoteList from './components/NoteList';
 import NoteGrid from './components/NoteGrid';
@@ -13,6 +15,9 @@ export default function App() {
   const searchRef = useRef<HTMLInputElement>(null);
   const notes = useNotesStore((s) => s.notes);
   const load = useNotesStore((s) => s.load);
+  const remove = useNotesStore((s) => s.remove);
+  const closeEditor = useUIStore((s) => s.closeEditor);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const search = useUIStore((s) => s.search);
   const setSearch = useUIStore((s) => s.setSearch);
   const setResults = useUIStore((s) => s.setResults);
@@ -39,12 +44,34 @@ export default function App() {
     setResults(notes);
   }, [notes, setResults]);
 
+  const requestDelete = (id: string) => setPendingDeleteId(id);
+  const confirmDelete = async () => {
+    const id = pendingDeleteId;
+    setPendingDeleteId(null);
+    if (!id) return;
+    await remove(id);
+    if (screen === 'editor') closeEditor();
+    await load();
+  };
+  const cancelDelete = () => setPendingDeleteId(null);
+
   if (screen === 'editor') {
     const activeNoteId = useUIStore.getState().activeNoteId;
-    return <NoteEditor noteId={activeNoteId} onClose={() => void load()} />;
+    return (
+      <>
+        <NoteEditor noteId={activeNoteId} onClose={() => void load()} onDelete={requestDelete} />
+        <ConfirmDialog
+          open={pendingDeleteId !== null}
+          text={tr.deleteConfirm}
+          onConfirm={() => void confirmDelete()}
+          onCancel={cancelDelete}
+        />
+      </>
+    );
   }
 
   return (
+    <>
     <div className="h-full flex flex-col">
       <TopBar
         searchValue={search}
@@ -59,6 +86,7 @@ export default function App() {
             notes={results}
             selectedIndex={selectedIndex}
             onOpen={openNote}
+            onDelete={requestDelete}
             onNewNote={openNewNote}
           />
         ) : (
@@ -66,10 +94,18 @@ export default function App() {
             notes={results}
             selectedIndex={selectedIndex}
             onOpen={openNote}
+            onDelete={requestDelete}
             onNewNote={openNewNote}
           />
         )}
       </main>
     </div>
+    <ConfirmDialog
+      open={pendingDeleteId !== null}
+      text={tr.deleteConfirm}
+      onConfirm={() => void confirmDelete()}
+      onCancel={cancelDelete}
+    />
+    </>
   );
 }

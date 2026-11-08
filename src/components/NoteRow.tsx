@@ -1,14 +1,16 @@
 import { useEffect, useRef } from 'react';
 import type { Note } from '../types';
+import { tr } from '../i18n/tr';
 
 interface Props {
   note: Note;
   selected?: boolean;
   onClick?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-export default function NoteRow({ note, selected, onClick }: Props) {
-  const ref = useRef<HTMLButtonElement>(null);
+export default function NoteRow({ note, selected, onClick, onDelete }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
   const snippet = note.bodyText.replace(/\s+/g, ' ').trim();
   useEffect(() => {
     if (selected) {
@@ -16,19 +18,34 @@ export default function NoteRow({ note, selected, onClick }: Props) {
     }
   }, [selected]);
   return (
-    <button
+    <div
       ref={ref}
-      type="button"
       data-id={note.id}
-      onClick={() => onClick?.(note.id)}
-      className={`w-full flex items-baseline gap-4 px-3 py-2 text-left border-b border-line ${
+      className={`w-full flex items-center gap-2 px-3 py-2 border-b border-line ${
         selected ? 'bg-paper' : ''
       }`}
     >
-      <span className="font-bold shrink-0" style={{ color: note.titleColor ?? undefined }}>
-        {note.title}
-      </span>
-      <span className="flex-1 min-w-0 text-right text-xs text-muted truncate">{snippet}</span>
-    </button>
+      <button
+        type="button"
+        onClick={() => onClick?.(note.id)}
+        className="flex-1 min-w-0 flex items-baseline gap-4 text-left"
+      >
+        <span className="font-bold shrink-0" style={{ color: note.titleColor ?? undefined }}>
+          {note.title}
+        </span>
+        <span className="flex-1 min-w-0 text-right text-xs text-muted truncate">{snippet}</span>
+      </button>
+      <button
+        type="button"
+        aria-label={`${tr.delete}: ${note.title}`}
+        className="text-xs text-red-500 shrink-0"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete?.(note.id);
+        }}
+      >
+        {tr.delete}
+      </button>
+    </div>
   );
 }

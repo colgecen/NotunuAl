@@ -16,9 +16,10 @@ import type { FontKey } from '../types';
 interface Props {
   noteId: string | null;
   onClose: () => void;
+  onDelete?: (id: string) => void;
 }
 
-export default function NoteEditor({ noteId, onClose }: Props) {
+export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
   const [note, setNote] = useState<Note>(() => createNote({ id: noteId ?? undefined }));
   const [loaded, setLoaded] = useState(!noteId);
   const [dirty, setDirty] = useState(false);
@@ -194,7 +195,12 @@ export default function NoteEditor({ noteId, onClose }: Props) {
         <button type="button" aria-label={tr.back} className="px-3 py-1 rounded border border-line text-fg" onClick={() => void handleClose()}>
           {tr.back}
         </button>
-        <button type="button" aria-label={tr.delete} className="px-3 py-1 rounded border border-line text-red-500" onClick={() => {}}>
+        <button
+          type="button"
+          aria-label={tr.delete}
+          className="px-3 py-1 rounded border border-line text-red-500"
+          onClick={() => onDelete?.(latestNote.current.id)}
+        >
           {tr.delete}
         </button>
         {dirty ? <span aria-label="Kaydedilmemiş değişiklik" className="ml-1">{tr.dirty}</span> : null}
