@@ -2,6 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
+  projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
   webServer: {
     command: 'pnpm build:web && pnpm exec vite preview --port 4173',
     port: 4173,

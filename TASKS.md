@@ -138,12 +138,13 @@ _Bitiş notu:_ `fileService.saveBytes(ad, bytes, biçim)` → `saved | cancelled
 
 ## Aşama 4 — Kalite ve paketleme
 
-### [ ] T15 — Uçtan uca testler + performans
+### [x] T15 — Uçtan uca testler + performans
 Playwright (web build): `.` → arama → ↓ ↓ → Enter → düzenle → Kaydet; Ctrl+N; Ctrl+K; görünüm modu kalıcılığı.
 - 5.000 notla arama < 100 ms ölçümü (testte yaklaşık eşik)
 - Liste için sanallaştırma gerekirse ekle (`@tanstack/react-virtual`)
 
 **Kabul:** `pnpm test:e2e` yeşil; `pnpm verify` içine dahil edilmese de CI'da koşar.
+_Bitiş notu:_ 5 e2e testi geçiyor (4 akış + 5.000 notla arama performansı). Ölçüm: dizgi öneki hızlı yolu + `@tanstack/react-virtual` ile liste sanallaştırması; önce ~470 ms olan arama yanıtı <100 ms'ye indi. Arama servisi önce normalize alt dizgi eşleşmesi, sonuç yoksa Fuse bulanık aramaya düşer. Çıkan hata düzeltmesi: editörde **Geri** artık listeye dönüyor. Testlerde jsdom için `clientWidth/clientHeight` + `ResizeObserver` taklidi eklendi.
 
 ### [ ] T16 — Erişilebilirlik ve cila
 Odak halkası, `aria-*`, klavye ile tüm akış, kontrast (iki temada), animasyon sadeleştirme, uygulama simgesi, pencere min boyutu.

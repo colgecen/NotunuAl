@@ -51,6 +51,16 @@ export class SearchService {
   search(query: string): Note[] {
     const q = normalizeTr(query.trim());
     if (!q) return this.notes.map(({ nTitle: _nTitle, nBody: _nBody, ...n }) => n);
+    const terms = q.split(/\s+/).filter(Boolean);
+    // Hızlı yol: normalize edilmiş alt dizgi eşleşmesi (5000+ notta ~1 ms).
+    const direct = this.notes.filter((n) =>
+      terms.every((term) => n.nTitle.includes(term) || n.nBody.includes(term)),
+    );
+    if (direct.length > 0) {
+      const titleHits = direct.filter((n) => terms.every((term) => n.nTitle.includes(term)));
+      const rest = direct.filter((n) => !titleHits.includes(n));
+      return [...titleHits, ...rest].map(({ nTitle: _nTitle, nBody: _nBody, ...n }) => n);
+    }
     const results = this.fuse?.search(q) ?? [];
     return results.map(({ item }) => {
       const { nTitle: _nTitle, nBody: _nBody, ...note } = item;

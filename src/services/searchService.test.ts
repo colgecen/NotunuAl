@@ -42,4 +42,19 @@ describe('searchService', () => {
     searchService.setNotes(notes);
     expect(searchService.search('orman').map((n) => n.id)).toEqual(['3']);
   });
+
+  it('searches 5000 notes fast enough for typing', () => {
+    const many: Note[] = Array.from({ length: 5000 }, (_, i) => ({
+      ...base,
+      id: String(i),
+      title: `Not ${i} İstanbul`,
+      bodyText: `içerik ${i} ğüşiöç önemli toplantı notları`,
+    }));
+    searchService.setNotes(many);
+    const started = performance.now();
+    const results = searchService.search('istanbul');
+    const elapsed = performance.now() - started;
+    expect(results.length).toBeGreaterThan(0);
+    expect(elapsed).toBeLessThan(100);
+  });
 });

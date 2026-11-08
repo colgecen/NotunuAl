@@ -14,6 +14,7 @@
 | Arama | **Fuse.js** | Anlık bulanık arama |
 | Dışa aktarma | `docx`, `xlsx` (SheetJS), `pptxgenjs`, `jspdf` | Tarayıcıda çalışır, sunucu gerekmez |
 | Yerel dosya | `@tauri-apps/plugin-dialog` + `plugin-fs` | Native "Farklı Kaydet" penceresi |
+| Liste sanallaştırma | `@tanstack/react-virtual` | 5.000+ notta liste DOM'unu sabit tutar, arama <100 ms |
 | Fontlar | `@fontsource/arimo`, `@fontsource/tinos`, `@fontsource/gelasio`, `@fontsource/cousine`, `@fontsource/dejavu-sans` | Linux'ta Arial/Times/Georgia/Courier/Verdana için paketli, açık lisanslı karşılıklar |
 | Test | **Vitest**, Testing Library, `fake-indexeddb`, **Playwright** | Birim → bileşen → uçtan uca |
 | Lint/format | ESLint + Prettier | Tutarlı kod |

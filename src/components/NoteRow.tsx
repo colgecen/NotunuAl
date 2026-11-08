@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import type { Note } from '../types';
 import { tr } from '../i18n/tr';
 
@@ -10,18 +9,11 @@ interface Props {
 }
 
 export default function NoteRow({ note, selected, onClick, onDelete }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
   const snippet = note.bodyText.replace(/\s+/g, ' ').trim();
-  useEffect(() => {
-    if (selected) {
-      ref.current?.scrollIntoView({ block: 'nearest' });
-    }
-  }, [selected]);
   return (
     <div
-      ref={ref}
       data-id={note.id}
-      className={`w-full flex items-center gap-2 px-3 py-2 border-b border-line ${
+      className={`w-full h-full flex items-center gap-2 px-3 py-2 border-b border-line ${
         selected ? 'bg-paper' : ''
       }`}
     >

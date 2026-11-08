@@ -27,6 +27,7 @@ export default function App() {
   const selectedIndex = useUIStore((s) => s.selectedIndex);
   const openNote = useUIStore((s) => s.openNote);
   const openNewNote = useUIStore((s) => s.openNewNote);
+  const activeNoteId = useUIStore((s) => s.activeNoteId);
   const viewMode = useSettingsStore((s) => s.viewMode);
 
   useShortcuts();
@@ -56,10 +57,15 @@ export default function App() {
   const cancelDelete = () => setPendingDeleteId(null);
 
   if (screen === 'editor') {
-    const activeNoteId = useUIStore.getState().activeNoteId;
     return (
       <>
-        <NoteEditor noteId={activeNoteId} onClose={() => void load()} onDelete={requestDelete} />
+        <NoteEditor
+          noteId={activeNoteId}
+          onClose={() => {
+            void load().finally(() => closeEditor());
+          }}
+          onDelete={requestDelete}
+        />
         <ConfirmDialog
           open={pendingDeleteId !== null}
           text={tr.deleteConfirm}
