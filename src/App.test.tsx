@@ -3,5 +3,5 @@ import App from './App';
 
 test('renders NotunuAl!', () => {
   render(<App />);
-  expect(screen.getByText('NotunuAl!')).toBeTruthy();
+  expect(screen.getAllByText('NotunuAl!').length).toBeGreaterThan(0);
 });

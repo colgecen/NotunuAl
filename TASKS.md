@@ -61,7 +61,7 @@ CSS değişkenleri (açık: krem/kâğıt, koyu: koyu gri/lacivert), `data-theme
 
 ## Aşama 1 — Ana ekran
 
-### [ ] T03 — Uygulama kabuğu ve üst çubuk
+### [x] T03 — Uygulama kabuğu ve üst çubuk
 Üst çubuk: sol **`+ Yeni Ekle`**, orta/geniş **arama çubuğu**, sağ **tema anahtarı**. Metinler `i18n/tr.ts`'de. Başlık **NotunuAl!**.
 **Test:** bileşenler render oluyor, butonlar erişilebilir (`aria-label`).
 

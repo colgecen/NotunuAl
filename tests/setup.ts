@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 // fake-indexeddb is imported per test where needed.
 // Provide a default matchMedia for jsdom.

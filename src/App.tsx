@@ -1,25 +1,22 @@
-import { useEffect } from 'react';
-import { useSettingsStore } from './store/settingsStore';
-import ThemeToggle from './components/ThemeToggle';
+import { useRef, useState } from 'react';
+import TopBar from './components/TopBar';
+import { tr } from './i18n/tr';
 
 export default function App() {
-  const toggleTheme = useSettingsStore((s) => s.toggleTheme);
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
-        e.preventDefault();
-        toggleTheme();
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [toggleTheme]);
+  const [search, setSearch] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between">
-        <span className="text-xl font-bold">NotunuAl!</span>
-        <ThemeToggle />
-      </div>
+    <div className="h-full flex flex-col">
+      <TopBar
+        searchValue={search}
+        onSearchChange={setSearch}
+        onNewNote={() => {}}
+        searchRef={searchRef}
+      />
+      <main className="flex-1 p-4">
+        <span className="text-xl font-bold">{tr.appTitle}</span>
+      </main>
     </div>
   );
 }
