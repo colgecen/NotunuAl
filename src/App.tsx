@@ -3,6 +3,7 @@ import TopBar from './components/TopBar';
 import NoteList from './components/NoteList';
 import NoteGrid from './components/NoteGrid';
 import ViewModeSwitch from './components/ViewModeSwitch';
+import NoteEditor from './components/NoteEditor';
 import { useSettingsStore } from './store/settingsStore';
 import { useNotesStore } from './store/notesStore';
 import { useUIStore } from './store/uiStore';
@@ -39,7 +40,8 @@ export default function App() {
   }, [notes, setResults]);
 
   if (screen === 'editor') {
-    return <div className="p-4">Editör yakında</div>;
+    const activeNoteId = useUIStore.getState().activeNoteId;
+    return <NoteEditor noteId={activeNoteId} onClose={() => void load()} />;
   }
 
   return (

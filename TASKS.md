@@ -87,7 +87,7 @@ CSS değişkenleri (açık: krem/kâğıt, koyu: koyu gri/lacivert), `data-theme
 
 ## Aşama 2 — Not düzenleme
 
-### [ ] T07 — Yeni not + düzenleme ekranı iskeleti
+### [x] T07 — Yeni not + düzenleme ekranı iskeleti
 - **Ctrl+N** ve `+ Yeni Ekle` → yeni not, imleç başlıkta
 - Düzen: sol üst `Kaydet`/`Farklı Kaydet` (yer tutucu), başlık, **altında ayırıcı çizgi**, açıklama alanı
 - Esc/geri ile listeye dönüş; boş not silinir
