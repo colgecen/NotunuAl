@@ -84,44 +84,49 @@ export default function App() {
 
   return (
     <>
-    <div className="h-full flex flex-col">
-      <TopBar
-        searchValue={search}
-        onSearchChange={setSearch}
-        onNewNote={openNewNote}
-        searchRef={searchRef}
+      <div className="flex h-full flex-col">
+        <TopBar
+          searchValue={search}
+          onSearchChange={setSearch}
+          onNewNote={openNewNote}
+          searchRef={searchRef}
+          resultCount={results.length}
+        >
+          <ViewModeSwitch />
+        </TopBar>
+        <main className="min-h-0 flex-1">
+          <div className="col flex h-full flex-col py-4">
+            <div className="card flex min-h-0 flex-1 flex-col overflow-hidden shadow-panel">
+              {viewMode === 'icons' ? (
+                <NoteGrid
+                  notes={results}
+                  selectedIndex={selectedIndex}
+                  searching={search.trim() !== ''}
+                  onOpen={openNote}
+                  onDelete={requestDelete}
+                  onNewNote={openNewNote}
+                />
+              ) : (
+                <NoteList
+                  notes={results}
+                  selectedIndex={selectedIndex}
+                  spacious={viewMode === 'home'}
+                  searching={search.trim() !== ''}
+                  onOpen={openNote}
+                  onDelete={requestDelete}
+                  onNewNote={openNewNote}
+                />
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        text={tr.deleteConfirm}
+        onConfirm={() => void confirmDelete()}
+        onCancel={cancelDelete}
       />
-      <main className="flex-1 overflow-hidden flex flex-col">
-        <ViewModeSwitch />
-        <p role="status" aria-live="polite" className="sr-only">
-          {tr.searchResults(results.length)}
-        </p>
-        {viewMode === 'icons' ? (
-          <NoteGrid
-            notes={results}
-            selectedIndex={selectedIndex}
-            onOpen={openNote}
-            onDelete={requestDelete}
-            onNewNote={openNewNote}
-          />
-        ) : (
-          <NoteList
-            notes={results}
-            selectedIndex={selectedIndex}
-            spacious={viewMode === 'home'}
-            onOpen={openNote}
-            onDelete={requestDelete}
-            onNewNote={openNewNote}
-          />
-        )}
-      </main>
-    </div>
-    <ConfirmDialog
-      open={pendingDeleteId !== null}
-      text={tr.deleteConfirm}
-      onConfirm={() => void confirmDelete()}
-      onCancel={cancelDelete}
-    />
     </>
   );
 }

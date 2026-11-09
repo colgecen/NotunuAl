@@ -3,31 +3,66 @@
 @tailwind utilities;
 
 :root {
-  --bg: #f7f3e9;
-  --fg: #2b2a27;
+  --bg: #f6f2e9;
+  --paper: #fffdf8;
+  --surface: #fbf7ee;
+  --hover: #ece5d6;
+  --fg: #23211d;
   --muted: #6b655a;
-  --line: #d9d2c3;
-  --accent: #5b6cff;
-  --paper: #fffdf7;
+  --line: #e2dbcb;
+  --accent: #4f5ed7;
+  --accent-fg: #ffffff;
   --danger: #b91c1c;
+  --shadow: 0 1px 2px rgb(35 33 29 / 0.05), 0 10px 24px -16px rgb(35 33 29 / 0.28);
+  --shadow-lg: 0 2px 6px rgb(35 33 29 / 0.08), 0 20px 44px -20px rgb(35 33 29 / 0.35);
 }
 
 [data-theme='dark'] {
-  --bg: #1e2230;
-  --fg: #e6e4df;
+  --bg: #171a24;
+  --paper: #20242f;
+  --surface: #1b1f29;
+  --hover: #2a3040;
+  --fg: #e8e6e1;
   --muted: #9aa0ad;
-  --line: #3a3f52;
-  --accent: #8aa0ff;
-  --paper: #262b3a;
+  --line: #343a4a;
+  --accent: #8fa2ff;
+  --accent-fg: #171a24;
   --danger: #f87171;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 12px 28px -18px rgb(0 0 0 / 0.7);
+  --shadow-lg: 0 2px 8px rgb(0 0 0 / 0.4), 0 24px 48px -22px rgb(0 0 0 / 0.8);
 }
 
-html, body, #root { height: 100%; }
-body { margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, sans-serif; }
-*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 15px;
+  line-height: 1.45;
+  font-family: 'Arimo', ui-sans-serif, system-ui, 'DejaVu Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+*::selection {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 0.35rem;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -35,9 +70,92 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: system-u
   }
 }
 
+@layer components {
+  /* Yumuşak, ince kaydırma çubuğu */
+  .scroll-slim {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  .scroll-slim::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .scroll-slim::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  .scroll-slim::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+    background-clip: content-box;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg
+      border border-line bg-paper px-3 py-1.5 text-sm font-medium text-fg
+      transition-colors duration-150 hover:bg-hover active:translate-y-px;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg
+      border border-accent bg-accent px-3 py-1.5 text-sm font-semibold text-accentfg
+      transition-colors duration-150 hover:brightness-110 active:translate-y-px;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg
+      border border-transparent px-2.5 py-1.5 text-sm text-muted transition-colors
+      duration-150 hover:bg-hover hover:text-fg;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg
+      border border-transparent px-2.5 py-1.5 text-sm font-medium text-danger
+      transition-colors duration-150 hover:border-danger hover:bg-hover;
+  }
+  .btn-icon {
+    @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg
+      border border-transparent text-muted transition-colors duration-150
+      hover:bg-hover hover:text-fg;
+  }
+  .btn-toggle {
+    @apply inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm
+      text-muted transition-colors duration-150 hover:bg-hover hover:text-fg;
+  }
+  .btn-toggle[data-pressed='true'] {
+    @apply bg-hover text-fg;
+  }
+
+  .field {
+    @apply rounded-lg border border-line bg-paper px-2.5 py-1.5 text-sm text-fg
+      transition-colors duration-150;
+  }
+  .caption {
+    @apply select-none text-xs font-medium uppercase tracking-wide text-muted;
+  }
+  .card {
+    @apply rounded-xl border border-line bg-paper;
+  }
+  /* Üst çubuk ve editördeki satırların aynı sütuna hizalanması için */
+  .col {
+    @apply mx-auto w-full max-w-5xl px-4;
+  }
+  .kbd {
+    @apply inline-flex min-w-5 items-center justify-center rounded border border-line
+      bg-surface px-1 font-mono text-[11px] leading-5 text-muted;
+  }
+  .sep {
+    @apply h-6 w-px shrink-0 bg-line;
+  }
+  .swatch {
+    @apply h-7 w-9 shrink-0 cursor-pointer rounded-md border border-line bg-paper p-0.5;
+  }
+}
+
+/* --- Düzenleyici içeriği --- */
 .tiptap {
-  padding: 0.75rem;
+  padding: 1rem 1.25rem 3rem;
   min-height: 220px;
+  max-width: 46rem;
+  line-height: 1.6;
 }
 
 .tiptap:focus {
@@ -58,6 +176,34 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: system-u
 }
 
 .tiptap mark {
-  padding: 0 0.125rem;
-  border-radius: 0.125rem;
+  padding: 0.05em 0.2em;
+  border-radius: 0.2em;
+}
+
+.tiptap h1 {
+  @apply mb-2 mt-4 text-2xl font-bold leading-snug;
+}
+.tiptap h2 {
+  @apply mb-2 mt-3 text-xl font-bold leading-snug;
+}
+.tiptap h3 {
+  @apply mb-1 mt-3 text-lg font-bold leading-snug;
+}
+.tiptap p {
+  @apply my-2;
+}
+.tiptap ul {
+  @apply my-2 list-disc pl-6;
+}
+.tiptap ol {
+  @apply my-2 list-decimal pl-6;
+}
+.tiptap blockquote {
+  @apply my-3 border-l-2 border-line pl-3 text-muted;
+}
+.tiptap hr {
+  @apply my-4 border-0 border-t border-line;
+}
+.tiptap code {
+  @apply rounded bg-surface px-1 py-0.5 font-mono text-[0.9em];
 }

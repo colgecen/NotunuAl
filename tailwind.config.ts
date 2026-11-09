@@ -7,12 +7,22 @@ export default {
     extend: {
       colors: {
         bg: 'var(--bg)',
+        paper: 'var(--paper)',
+        surface: 'var(--surface)',
+        hover: 'var(--hover)',
         fg: 'var(--fg)',
         muted: 'var(--muted)',
         line: 'var(--line)',
         accent: 'var(--accent)',
-        paper: 'var(--paper)',
+        accentfg: 'var(--accent-fg)',
         danger: 'var(--danger)',
+      },
+      boxShadow: {
+        panel: 'var(--shadow)',
+        float: 'var(--shadow-lg)',
+      },
+      borderRadius: {
+        card: '0.75rem',
       },
     },
   },

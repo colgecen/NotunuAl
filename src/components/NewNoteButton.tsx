@@ -10,7 +10,8 @@ export default function NewNoteButton({ onClick }: Props) {
       type="button"
       onClick={onClick}
       aria-label={tr.newNote}
-      className="px-3 py-1 rounded border border-line bg-paper text-fg font-semibold"
+      title={tr.shortcutHint('Ctrl+N')}
+      className="btn-primary shrink-0"
     >
       {tr.newNote}
     </button>

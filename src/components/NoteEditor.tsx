@@ -9,9 +9,12 @@ import { extractBodyText } from '../services/textUtils';
 import { useNotesStore } from '../store/notesStore';
 import { useUIStore } from '../store/uiStore';
 import { useSettingsStore } from '../store/settingsStore';
-import { FONT_DISPLAY, FONT_STACKS } from '../theme/fonts';
+import { FONT_STACKS } from '../theme/fonts';
 import { tr } from '../i18n/tr';
-import SaveAsMenu from './SaveAsMenu';
+import EditorHeader from './EditorHeader';
+import EditorToolbar from './EditorToolbar';
+import TitleField from './TitleField';
+import { CalendarIcon } from './icons';
 import type { ExportFormat } from '../services/export';
 import { cleanFileName } from '../services/export/txt';
 import type { FontKey } from '../types';
@@ -22,13 +25,14 @@ interface Props {
   onDelete?: (id: string) => void;
 }
 
+const NOTICE_MS = 4000;
+
 export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
   const [note, setNote] = useState<Note>(() => createNote({ id: noteId ?? undefined }));
   const [loaded, setLoaded] = useState(!noteId);
   const [dirty, setDirty] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
-  const titleRef = useRef<HTMLInputElement>(null);
   const latestNote = useRef(note);
   const dirtyRef = useRef(false);
   const timerRef = useRef<number | null>(null);
@@ -88,12 +92,18 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
     }, 800);
   }
 
+  const updateNote = useCallback(
+    (patch: Partial<Note>) => {
+      const next = { ...latestNote.current, ...patch };
+      setNote(next);
+      markDirty(next);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      TextStyleKit,
-      Highlight.configure({ multicolor: true }),
-    ],
+    extensions: [StarterKit, TextStyleKit, Highlight.configure({ multicolor: true })],
     content: note.body,
     editorProps: {
       attributes: {
@@ -164,14 +174,22 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!notice) return;
+    const id = window.setTimeout(() => {
+      if (mountedRef.current) setNotice(null);
+    }, NOTICE_MS);
+    return () => window.clearTimeout(id);
+  }, [notice]);
+
   const exportSave = async (fmt: ExportFormat) => {
     await flushSave();
-    const note = latestNote.current;
+    const current = latestNote.current;
     try {
       const { EXPORT_EXTENSIONS, exportNote } = await import('../services/export');
       const { saveBytes } = await import('../services/fileService');
-      const bytes = await exportNote(note, fmt);
-      const name = `${cleanFileName(note.title)}.${EXPORT_EXTENSIONS[fmt]}`;
+      const bytes = await exportNote(current, fmt);
+      const name = `${cleanFileName(current.title)}.${EXPORT_EXTENSIONS[fmt]}`;
       const outcome = await saveBytes(name, bytes, fmt);
       if (outcome.status === 'saved') setNotice(tr.exportSaved);
       else if (outcome.status === 'error') setNotice(`${tr.exportError}: ${outcome.message ?? ''}`);
@@ -194,222 +212,88 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
     onClose();
   };
 
-  const toggleBold = () => editor?.chain().focus().toggleBold().run();
-  const toggleItalic = () => editor?.chain().focus().toggleItalic().run();
-  const setColor = (color: string) => editor?.chain().focus().setColor(color).run();
-  const setHighlight = (color: string) =>
-    editor?.chain().focus().toggleHighlight({ color }).run();
-  const setFontFamily = (font: FontKey) =>
+  const handleFontChange = (font: FontKey) => {
+    useSettingsStore.getState().setBodyFont(font);
     editor?.chain().focus().setFontFamily(FONT_STACKS[font]).run();
-  const setFontSize = (size: number) => {
+  };
+
+  const handleFontSizeChange = (size: number) => {
     setBodyFontSize(size);
     editor?.chain().focus().setFontSize(`${size}px`).run();
   };
 
-  if (!loaded) return <div className="p-4">{tr.appTitle}</div>;
+  if (!loaded) return <div className="p-4 text-sm text-muted">{tr.appTitle}</div>;
+
+  const words = note.bodyText.trim() ? note.bodyText.trim().split(/\s+/).length : 0;
 
   return (
-    <div className="h-full flex flex-col p-4 gap-2 overflow-auto">
-      <div className="flex gap-2 items-center">
-        <button type="button" aria-label={tr.save} className="px-3 py-1 rounded border border-line text-fg" onClick={() => void flushSave()}>
-          {tr.save}
-        </button>
-        <SaveAsMenu onSelect={(fmt: ExportFormat) => void exportSave(fmt)} />
-        <button type="button" aria-label={tr.back} className="px-3 py-1 rounded border border-line text-fg" onClick={() => void handleClose()}>
-          {tr.back}
-        </button>
-        <button
-          type="button"
-          aria-label={tr.delete}
-          className="px-3 py-1 rounded border border-line text-danger"
-          onClick={() => onDelete?.(latestNote.current.id)}
-        >
-          {tr.delete}
-        </button>
-        {dirty ? <span aria-label={tr.unsavedChanges} className="ml-1">{tr.dirty}</span> : null}
-        {savedFlash ? <span className="text-xs text-muted ml-2">{tr.saved}</span> : null}
-        {notice ? (
-          <span role="status" className="text-xs text-muted ml-2">
-            {notice}
-          </span>
-        ) : null}
-      </div>
-
-      <input
-        ref={titleRef}
-        autoFocus
-        type="text"
-        aria-label={tr.titlePlaceholder}
-        placeholder={tr.titlePlaceholder}
-        value={note.title}
-        onChange={(e) => {
-          const next = { ...note, title: e.target.value };
-          setNote(next);
-          markDirty(next);
-        }}
-        className="text-2xl font-bold bg-transparent border-b-2 border-line pb-1 outline-none"
-        style={{ color: note.titleColor ?? undefined, fontFamily: note.titleFont ? FONT_STACKS[note.titleFont] : undefined }}
+    <div className="flex h-full flex-col">
+      <EditorHeader
+        dirty={dirty}
+        savedFlash={savedFlash}
+        notice={notice}
+        onSave={() => void flushSave()}
+        onSelectFormat={(fmt) => void exportSave(fmt)}
+        onBack={() => void handleClose()}
+        onDelete={() => onDelete?.(latestNote.current.id)}
       />
-      <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
-        <label>
-          {tr.titleFont}
-          <select
-            aria-label={tr.titleFont}
-            className="ml-1 p-1 rounded border border-line bg-paper text-fg"
-            value={note.titleFont ?? ''}
-            onChange={(e) => {
-              const next = { ...note, titleFont: (e.target.value || null) as FontKey | null };
-              setNote(next);
-              markDirty(next);
-            }}
-          >
-            <option value="">{tr.titleFontTheme}</option>
-            {(Object.keys(FONT_DISPLAY) as FontKey[]).map((f) => (
-              <option key={f} value={f}>
-                {FONT_DISPLAY[f]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {tr.titleColor}
-          <input
-            type="color"
-            aria-label={tr.titleColorPicker}
-            value={note.titleColor ?? '#000000'}
-            onChange={(e) => {
-              const next = { ...note, titleColor: e.target.value };
-              setNote(next);
-              markDirty(next);
-            }}
-            className="h-6 w-10 ml-1"
-          />
-          <button
-            type="button"
-            className="underline ml-1"
-            onClick={() => {
-              const next = { ...note, titleColor: null };
-              setNote(next);
-              markDirty(next);
-            }}
-          >
-            {tr.clear}
-          </button>
-        </label>
+      <div className="shrink-0 border-b border-line bg-paper">
+        <TitleField
+          title={note.title}
+          titleColor={note.titleColor}
+          titleFont={note.titleFont}
+          onTitleChange={(title) => updateNote({ title })}
+          onTitleColorChange={(titleColor) => updateNote({ titleColor })}
+          onTitleFontChange={(titleFont) => updateNote({ titleFont })}
+        />
+        <EditorToolbar
+          editor={editor}
+          bodyFont={bodyFont}
+          bodyFontSize={bodyFontSize}
+          onFontChange={handleFontChange}
+          onFontSizeChange={handleFontSizeChange}
+        />
+        <div className="border-t border-line bg-surface" role="group" aria-label={tr.noteMetaLabel}>
+          <div className="col flex flex-wrap items-center gap-2 py-1.5">
+            {note.date ? (
+              <>
+                <CalendarIcon className="h-4 w-4 text-muted" />
+                <input
+                  type="date"
+                  aria-label={tr.dateLabel}
+                  value={note.date}
+                  onChange={(e) => updateNote({ date: e.target.value || null })}
+                  className="field"
+                />
+                <button
+                  type="button"
+                  className="btn-ghost"
+                  onClick={() => updateNote({ date: null })}
+                >
+                  {tr.removeDate}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => updateNote({ date: new Date().toISOString().slice(0, 10) })}
+              >
+                <CalendarIcon className="h-4 w-4" />
+                {tr.addDate}
+              </button>
+            )}
+            <p className="ml-auto text-xs tabular-nums text-muted">{tr.wordCount(words)}</p>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 p-2 border border-line rounded bg-paper text-sm">
-        <button type="button" aria-label={tr.bold} className="font-bold px-2 border border-line rounded" onClick={toggleBold}>
-          B
-        </button>
-        <button type="button" aria-label={tr.italic} className="italic px-2 border border-line rounded" onClick={toggleItalic}>
-          I
-        </button>
-        <label className="flex items-center gap-1">
-          {tr.textColor}
-          <input
-            type="color"
-            aria-label={tr.textColor}
-            defaultValue="#000000"
-            onChange={(e) => setColor(e.target.value)}
-            className="h-6 w-10"
-          />
-        </label>
-        <label className="flex items-center gap-1">
-          {tr.highlightLabel}
-          <input
-            type="color"
-            aria-label={tr.highlightColor}
-            defaultValue="#fff200"
-            onChange={(e) => setHighlight(e.target.value)}
-            className="h-6 w-10"
-          />
-          <button type="button" className="underline" onClick={() => editor?.chain().focus().unsetHighlight().run()}>
-            {tr.clear}
-          </button>
-        </label>
-        <label className="flex items-center gap-1">
-          {tr.fontFamily}
-          <select
-            aria-label={tr.fontFamily}
-            className="p-1 rounded border border-line bg-paper text-fg"
-            value={bodyFont}
-            onChange={(e) => {
-              const font = e.target.value as FontKey;
-              useSettingsStore.getState().setBodyFont(font);
-              setFontFamily(font);
-            }}
-          >
-            {(Object.keys(FONT_DISPLAY) as FontKey[]).map((f) => (
-              <option key={f} value={f}>
-                {FONT_DISPLAY[f]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex items-center gap-1">
-          {tr.fontSize}
-          <button type="button" aria-label={tr.decreaseFont} className="px-1 border border-line rounded" onClick={() => setFontSize(Math.max(12, bodyFontSize - 1))}>
-            A-
-          </button>
-          <input
-            type="range"
-            min={12}
-            max={32}
-            value={bodyFontSize}
-            aria-label={tr.fontSize}
-            onChange={(e) => setFontSize(Number(e.target.value))}
-          />
-          <button type="button" aria-label={tr.increaseFont} className="px-1 border border-line rounded" onClick={() => setFontSize(Math.min(32, bodyFontSize + 1))}>
-            A+
-          </button>
-          <span>{bodyFontSize}px</span>
-        </label>
-      </div>
-
-      <div className="flex items-center gap-2">
-        {note.date ? (
-          <>
-            <input
-              type="date"
-              aria-label={tr.dateLabel}
-              value={note.date}
-              onChange={(e) => {
-                const next = { ...note, date: e.target.value || null };
-                setNote(next);
-                markDirty(next);
-              }}
-              className="p-1 rounded border border-line bg-paper text-fg"
-            />
-            <button
-              type="button"
-              className="underline text-sm"
-              onClick={() => {
-                const next = { ...note, date: null };
-                setNote(next);
-                markDirty(next);
-              }}
-            >
-              {tr.removeDate}
-            </button>
-          </>
-        ) : (
-          <button
-            type="button"
-            className="text-sm underline"
-            onClick={() => {
-              const next = { ...note, date: new Date().toISOString().slice(0, 10) };
-              setNote(next);
-              markDirty(next);
-            }}
-          >
-            {tr.addDate}
-          </button>
-        )}
-      </div>
-
-      <div className="flex-1 min-h-0 border border-line rounded bg-paper overflow-auto">
-        <EditorContent editor={editor} />
+      <div className="scroll-slim min-h-0 flex-1 overflow-y-auto py-4">
+        <div className="col">
+          <div className="min-h-full rounded-card border border-line bg-paper shadow-panel">
+            <EditorContent editor={editor} />
+          </div>
+        </div>
       </div>
     </div>
   );

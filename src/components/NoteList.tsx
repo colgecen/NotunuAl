@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type { Note } from '../types';
 import NoteRow from './NoteRow';
+import EmptyState from './EmptyState';
 import { tr } from '../i18n/tr';
 
 interface Props {
@@ -11,10 +12,11 @@ interface Props {
   onDelete?: (id: string) => void;
   onNewNote?: () => void;
   spacious?: boolean;
+  searching?: boolean;
 }
 
-const ROW_HEIGHT = 41;
-const SPACIOUS_ROW_HEIGHT = 55;
+const ROW_HEIGHT = 40;
+const SPACIOUS_ROW_HEIGHT = 56;
 
 export default function NoteList({
   notes,
@@ -23,6 +25,7 @@ export default function NoteList({
   onDelete,
   onNewNote,
   spacious,
+  searching,
 }: Props) {
   const parentRef = useRef<HTMLDivElement>(null);
   // TanStack Virtual'ın API'si tasarım gereği memoize edilemez; React Compiler kuralı burada geçersiz.
@@ -43,14 +46,7 @@ export default function NoteList({
   }, [selectedIndex, notes.length, virtualizer]);
 
   if (notes.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-center text-muted p-6">
-        <p className="mb-4">{tr.emptyState}</p>
-        <button type="button" onClick={onNewNote} className="px-3 py-2 rounded border border-line text-fg">
-          {tr.newNote}
-        </button>
-      </div>
-    );
+    return <EmptyState onNewNote={onNewNote} searching={searching} />;
   }
 
   const items = virtualizer.getVirtualItems();
@@ -60,7 +56,7 @@ export default function NoteList({
       ref={parentRef}
       role="list"
       aria-label={tr.noteListLabel}
-      className="overflow-y-auto h-full"
+      className="scroll-slim h-full overflow-y-auto"
     >
       <div
         role="presentation"
