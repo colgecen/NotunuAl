@@ -161,9 +161,10 @@ _Bitiş notu:_ Tüm UI metinleri `tr.ts`'ye taşındı. Liste `role="list"`/`lis
 **Commit:** `build(appimage): add AppImage bundling, CI and Wayland notes [T17]`
 _Bitiş notu:_ `README.md` (özellikler, kısayollar, Fedora/Arch bağımlılıkları, çalıştırma, Wayland notları, gizlilik) ve `scripts/build-appimage.sh` (Arch'ı algılayıp `NO_STRIP=true`, `--verify` seçeneği, artifact listesi) eklendi. `package.json` içine `build:appimage` eklendi. `.github/workflows/ci.yml` üç iş içeriyor: `verify`, `e2e` (Chromium) ve `appimage` (`ubuntu-22.04` + Tauri bağımlılıkları + Rust cache + artifact yükleme). Yerel `pnpm tauri build` eksik `webkit2gtk4.1`/`libsoup-3.0` nedeniyle çalıştırılamadı (bkz. Blokajlar); AppImage derlemesi CI'da yapılır. `pnpm verify` yeşil: 18 dosya, 62 test.
 
-### [ ] T18 — Sürüm 0.1.0
+### [x] T18 — Sürüm 0.1.0
 `CHANGELOG.md`, sürüm numarası, etiket (`v0.1.0`), kısa kullanım kılavuzu (kısayollar tablosu).
 **Commit:** `chore(release): v0.1.0 [T18]`
+_Bitiş notu:_ `CHANGELOG.md` (Keep a Changelog biçimi, 0.1.0 özellikleri) ve `docs/KULLANIM.md` (ilk açılış, not oluşturma, arama, görünüm, dışa aktarma, silme, kısayollar, veri konumu, Wayland sorun giderme) eklendi; README'den bağlandı. Sürüm `0.1.0` olarak `package.json`, `src-tauri/Cargo.toml` ve `src-tauri/tauri.conf.json` içinde tutarlı. `v0.1.0` etiketi oluşturulup push edildi.
 
 ---
 

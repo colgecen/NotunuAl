@@ -6,6 +6,8 @@ Notlar yalnızca cihazda (IndexedDB) durur; hesap, ağ isteği ve telemetri yokt
 - Platform: **Fedora / Arch Linux, Wayland** (AppImage)
 - Teknoloji: Tauri v2 + React + TypeScript + Vite
 
+Kısa kullanım kılavuzu: [`docs/KULLANIM.md`](docs/KULLANIM.md)
+
 ## Özellikler
 
 - Not listesi: kalın başlık, sağda soluk tek satır açıklama
