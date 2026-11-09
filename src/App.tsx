@@ -28,6 +28,7 @@ export default function App() {
   const openNote = useUIStore((s) => s.openNote);
   const openNewNote = useUIStore((s) => s.openNewNote);
   const activeNoteId = useUIStore((s) => s.activeNoteId);
+  const session = useUIStore((s) => s.session);
   const viewMode = useSettingsStore((s) => s.viewMode);
 
   useShortcuts();
@@ -45,6 +46,10 @@ export default function App() {
     setResults(notes);
   }, [notes, setResults]);
 
+  useEffect(() => {
+    if (screen === 'list') void load();
+  }, [screen, load]);
+
   const requestDelete = (id: string) => setPendingDeleteId(id);
   const confirmDelete = async () => {
     const id = pendingDeleteId;
@@ -60,6 +65,7 @@ export default function App() {
     return (
       <>
         <NoteEditor
+          key={session}
           noteId={activeNoteId}
           onClose={() => {
             void load().finally(() => closeEditor());
@@ -87,6 +93,9 @@ export default function App() {
       />
       <main className="flex-1 overflow-hidden flex flex-col">
         <ViewModeSwitch />
+        <p role="status" aria-live="polite" className="sr-only">
+          {tr.searchResults(results.length)}
+        </p>
         {viewMode === 'icons' ? (
           <NoteGrid
             notes={results}
@@ -99,6 +108,7 @@ export default function App() {
           <NoteList
             notes={results}
             selectedIndex={selectedIndex}
+            spacious={viewMode === 'home'}
             onOpen={openNote}
             onDelete={requestDelete}
             onNewNote={openNewNote}

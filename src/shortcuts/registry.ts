@@ -26,8 +26,10 @@ export const shortcuts: Shortcut[] = [
   },
   {
     keys: 'ctrl+n',
-    when: () => useUIStore.getState().screen === 'list',
-    run: () => useUIStore.getState().openNewNote(),
+    run: (ctx) => {
+      ctx.event.preventDefault();
+      useUIStore.getState().newNote();
+    },
   },
   {
     keys: 'ctrl+s',
@@ -73,8 +75,11 @@ export const shortcuts: Shortcut[] = [
     keys: 'escape',
     run: (ctx) => {
       const ui = useUIStore.getState();
+      // Açık onay penceresi kendi Esc davranışını yönetir.
+      if (document.querySelector('[role="alertdialog"]')) return;
       if (ui.screen === 'editor') {
-        ui.closeEditor();
+        ctx.event.preventDefault();
+        void ui.saveAndClose();
       } else if (ui.search) {
         ui.setSearch('');
       } else if (ctx.event.target instanceof HTMLElement) {

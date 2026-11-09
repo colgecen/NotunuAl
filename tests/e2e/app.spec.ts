@@ -24,7 +24,7 @@ test('keyboard flow: "." focuses search, arrows navigate, Enter opens, save pers
   await expect(page.getByRole('textbox', { name: 'Ara...' })).toBeFocused();
 
   await page.keyboard.type('kiraz');
-  await expect(page.locator('[role="option"]')).toHaveCount(1);
+  await expect(page.locator('[role="listitem"]')).toHaveCount(1);
 
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
@@ -45,6 +45,20 @@ test('Ctrl+N opens a new note from the list', async ({ page }) => {
   await openApp(page);
   await page.keyboard.press('Control+n');
   await expect(page.getByRole('textbox', { name: 'Başlık', exact: true })).toBeVisible();
+});
+
+test('Ctrl+N works inside the editor and Escape saves before returning', async ({ page }) => {
+  await openApp(page);
+  await page.keyboard.press('Control+n');
+  await page.getByRole('textbox', { name: 'Başlık', exact: true }).fill('İlk not');
+  await page.keyboard.press('Control+n');
+  const title = page.getByRole('textbox', { name: 'Başlık', exact: true });
+  await expect(title).toHaveValue('');
+  await title.fill('Esc ile kaydedilecek');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: '+ Yeni Ekle' }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Esc ile kaydedilecek notunu aç' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'İlk not notunu aç' })).toBeVisible();
 });
 
 test('Ctrl+K toggles theme and it persists across reload', async ({ page }) => {

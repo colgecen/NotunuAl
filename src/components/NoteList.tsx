@@ -10,18 +10,27 @@ interface Props {
   onOpen?: (id: string) => void;
   onDelete?: (id: string) => void;
   onNewNote?: () => void;
+  spacious?: boolean;
 }
 
 const ROW_HEIGHT = 41;
+const SPACIOUS_ROW_HEIGHT = 55;
 
-export default function NoteList({ notes, selectedIndex = -1, onOpen, onDelete, onNewNote }: Props) {
+export default function NoteList({
+  notes,
+  selectedIndex = -1,
+  onOpen,
+  onDelete,
+  onNewNote,
+  spacious,
+}: Props) {
   const parentRef = useRef<HTMLDivElement>(null);
   // TanStack Virtual'ın API'si tasarım gereği memoize edilemez; React Compiler kuralı burada geçersiz.
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: notes.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => ROW_HEIGHT,
+    estimateSize: () => (spacious ? SPACIOUS_ROW_HEIGHT : ROW_HEIGHT),
     overscan: 8,
     // jsdom'da ölçüm yok; gerçek tarayıcıda ResizeObserver devralır.
     initialRect: { width: 800, height: 600 },
@@ -49,23 +58,21 @@ export default function NoteList({ notes, selectedIndex = -1, onOpen, onDelete, 
   return (
     <div
       ref={parentRef}
-      role="listbox"
-      aria-label={tr.appTitle}
-      aria-activedescendant={selectedIndex >= 0 ? `note-${notes[selectedIndex]?.id}` : undefined}
+      role="list"
+      aria-label={tr.noteListLabel}
       className="overflow-y-auto h-full"
     >
-      <div style={{ height: virtualizer.getTotalSize(), position: 'relative', width: '100%' }}>
+      <div
+        role="presentation"
+        style={{ height: virtualizer.getTotalSize(), position: 'relative', width: '100%' }}
+      >
         {items.map((item) => {
           const note = notes[item.index];
           if (!note) return null;
           return (
             <div
               key={note.id}
-              id={`note-${note.id}`}
-              role="option"
-              aria-selected={item.index === selectedIndex}
-              aria-setsize={notes.length}
-              aria-posinset={item.index + 1}
+              role="listitem"
               style={{
                 position: 'absolute',
                 top: 0,
@@ -78,6 +85,7 @@ export default function NoteList({ notes, selectedIndex = -1, onOpen, onDelete, 
               <NoteRow
                 note={note}
                 selected={item.index === selectedIndex}
+                spacious={spacious}
                 onClick={onOpen}
                 onDelete={onDelete}
               />

@@ -98,6 +98,8 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
     editorProps: {
       attributes: {
         class: 'tiptap',
+        'aria-label': tr.editorLabel,
+        'aria-multiline': 'true',
         style: `font-family:${FONT_STACKS[bodyFont]}; font-size:${bodyFontSize}px; min-height:200px;`,
       },
     },
@@ -134,6 +136,8 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
       editorProps: {
         attributes: {
           class: 'tiptap',
+          'aria-label': tr.editorLabel,
+          'aria-multiline': 'true',
           style: `font-family:${FONT_STACKS[bodyFont]}; font-size:${bodyFontSize}px; min-height:200px;`,
         },
       },
@@ -217,12 +221,12 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
         <button
           type="button"
           aria-label={tr.delete}
-          className="px-3 py-1 rounded border border-line text-red-500"
+          className="px-3 py-1 rounded border border-line text-danger"
           onClick={() => onDelete?.(latestNote.current.id)}
         >
           {tr.delete}
         </button>
-        {dirty ? <span aria-label="Kaydedilmemiş değişiklik" className="ml-1">{tr.dirty}</span> : null}
+        {dirty ? <span aria-label={tr.unsavedChanges} className="ml-1">{tr.dirty}</span> : null}
         {savedFlash ? <span className="text-xs text-muted ml-2">{tr.saved}</span> : null}
         {notice ? (
           <span role="status" className="text-xs text-muted ml-2">
@@ -248,9 +252,9 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
       />
       <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
         <label>
-          {tr.titlePlaceholder} {tr.formats.arial}
+          {tr.titleFont}
           <select
-            aria-label="Başlık yazı tipi"
+            aria-label={tr.titleFont}
             className="ml-1 p-1 rounded border border-line bg-paper text-fg"
             value={note.titleFont ?? ''}
             onChange={(e) => {
@@ -259,7 +263,7 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
               markDirty(next);
             }}
           >
-            <option value="">Tema</option>
+            <option value="">{tr.titleFontTheme}</option>
             {(Object.keys(FONT_DISPLAY) as FontKey[]).map((f) => (
               <option key={f} value={f}>
                 {FONT_DISPLAY[f]}
@@ -268,10 +272,10 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
           </select>
         </label>
         <label>
-          {tr.titlePlaceholder} rengi
+          {tr.titleColor}
           <input
             type="color"
-            aria-label="Başlık rengi seç"
+            aria-label={tr.titleColorPicker}
             value={note.titleColor ?? '#000000'}
             onChange={(e) => {
               const next = { ...note, titleColor: e.target.value };
@@ -289,45 +293,45 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
               markDirty(next);
             }}
           >
-            Temizle
+            {tr.clear}
           </button>
         </label>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 p-2 border border-line rounded bg-paper text-sm">
-        <button type="button" aria-label="Kalın" className="font-bold px-2 border border-line rounded" onClick={toggleBold}>
+        <button type="button" aria-label={tr.bold} className="font-bold px-2 border border-line rounded" onClick={toggleBold}>
           B
         </button>
-        <button type="button" aria-label="İtalik" className="italic px-2 border border-line rounded" onClick={toggleItalic}>
+        <button type="button" aria-label={tr.italic} className="italic px-2 border border-line rounded" onClick={toggleItalic}>
           I
         </button>
         <label className="flex items-center gap-1">
-          Renk
+          {tr.textColor}
           <input
             type="color"
-            aria-label="Yazı rengi"
+            aria-label={tr.textColor}
             defaultValue="#000000"
             onChange={(e) => setColor(e.target.value)}
             className="h-6 w-10"
           />
         </label>
         <label className="flex items-center gap-1">
-          Fosfor
+          {tr.highlightLabel}
           <input
             type="color"
-            aria-label="Vurgu rengi"
+            aria-label={tr.highlightColor}
             defaultValue="#fff200"
             onChange={(e) => setHighlight(e.target.value)}
             className="h-6 w-10"
           />
           <button type="button" className="underline" onClick={() => editor?.chain().focus().unsetHighlight().run()}>
-            Temizle
+            {tr.clear}
           </button>
         </label>
         <label className="flex items-center gap-1">
-          Yazı tipi
+          {tr.fontFamily}
           <select
-            aria-label="Yazı tipi"
+            aria-label={tr.fontFamily}
             className="p-1 rounded border border-line bg-paper text-fg"
             value={bodyFont}
             onChange={(e) => {
@@ -344,8 +348,8 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
           </select>
         </label>
         <label className="flex items-center gap-1">
-          Boyut
-          <button type="button" aria-label="Yazı boyutu küçült" className="px-1 border border-line rounded" onClick={() => setFontSize(Math.max(12, bodyFontSize - 1))}>
+          {tr.fontSize}
+          <button type="button" aria-label={tr.decreaseFont} className="px-1 border border-line rounded" onClick={() => setFontSize(Math.max(12, bodyFontSize - 1))}>
             A-
           </button>
           <input
@@ -353,10 +357,10 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
             min={12}
             max={32}
             value={bodyFontSize}
-            aria-label="Açıklama yazı boyutu"
+            aria-label={tr.fontSize}
             onChange={(e) => setFontSize(Number(e.target.value))}
           />
-          <button type="button" aria-label="Yazı boyutu büyüt" className="px-1 border border-line rounded" onClick={() => setFontSize(Math.min(32, bodyFontSize + 1))}>
+          <button type="button" aria-label={tr.increaseFont} className="px-1 border border-line rounded" onClick={() => setFontSize(Math.min(32, bodyFontSize + 1))}>
             A+
           </button>
           <span>{bodyFontSize}px</span>
@@ -368,7 +372,7 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
           <>
             <input
               type="date"
-              aria-label="Tarih"
+              aria-label={tr.dateLabel}
               value={note.date}
               onChange={(e) => {
                 const next = { ...note, date: e.target.value || null };

@@ -1,4 +1,5 @@
 import { useSettingsStore } from '../store/settingsStore';
+import { tr } from '../i18n/tr';
 
 export default function ThemeToggle() {
   const theme = useSettingsStore((s) => s.theme);
@@ -6,11 +7,13 @@ export default function ThemeToggle() {
   return (
     <button
       type="button"
-      aria-label="Tema değiştir"
+      aria-label={tr.themeToggle}
+      title={tr.themeToggle}
+      aria-pressed={theme === 'dark'}
       onClick={toggleTheme}
       className="rounded px-2 py-1 border border-line text-fg"
     >
-      {theme === 'light' ? '☀' : '☾'}
+      <span aria-hidden="true">{theme === 'light' ? '☀' : '☾'}</span>
     </button>
   );
 }

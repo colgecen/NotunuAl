@@ -7,7 +7,7 @@ export default function ViewModeSwitch() {
   const setViewMode = useSettingsStore((s) => s.setViewMode);
   const modes: ViewMode[] = ['rows', 'icons', 'home'];
   return (
-    <div className="flex gap-1 p-1 border-b border-line" role="group" aria-label="Görünüm modu">
+    <div className="flex gap-1 p-1 border-b border-line" role="group" aria-label={tr.viewModeLabel}>
       {modes.map((m) => (
         <button
           key={m}

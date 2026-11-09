@@ -35,7 +35,7 @@ test('search responds under 100 ms with 5000 notes', async ({ page }) => {
   const searchInput = page.getByRole('textbox', { name: 'Ara...' });
   await searchInput.waitFor();
   // Notların yüklenip ilk listeyi çizmesini bekle.
-  await page.locator('[role="option"]').first().waitFor();
+  await page.locator('[role="listitem"]').first().waitFor();
   await page.waitForTimeout(300);
 
   const elapsed = await page.evaluate(async () => {
@@ -49,7 +49,7 @@ test('search responds under 100 ms with 5000 notes', async ({ page }) => {
     input.dispatchEvent(new Event('input', { bubbles: true }));
     await new Promise<void>((resolve) => {
       const check = () => {
-        const first = document.querySelector('[role="option"]');
+        const first = document.querySelector('[role="listitem"]');
         if (first && first.textContent?.includes('İstanbul')) {
           resolve();
           return;
@@ -62,6 +62,6 @@ test('search responds under 100 ms with 5000 notes', async ({ page }) => {
   });
 
   await expect(searchInput).toHaveValue('istanbul');
-  await expect(page.locator('[role="option"]').first()).toContainText('İstanbul');
+  await expect(page.locator('[role="listitem"]').first()).toContainText('İstanbul');
   expect(elapsed).toBeLessThan(100);
 });

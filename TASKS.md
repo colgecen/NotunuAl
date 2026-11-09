@@ -146,9 +146,10 @@ Playwright (web build): `.` → arama → ↓ ↓ → Enter → düzenle → Kay
 **Kabul:** `pnpm test:e2e` yeşil; `pnpm verify` içine dahil edilmese de CI'da koşar.
 _Bitiş notu:_ 5 e2e testi geçiyor (4 akış + 5.000 notla arama performansı). Ölçüm: dizgi öneki hızlı yolu + `@tanstack/react-virtual` ile liste sanallaştırması; önce ~470 ms olan arama yanıtı <100 ms'ye indi. Arama servisi önce normalize alt dizgi eşleşmesi, sonuç yoksa Fuse bulanık aramaya düşer. Çıkan hata düzeltmesi: editörde **Geri** artık listeye dönüyor. Testlerde jsdom için `clientWidth/clientHeight` + `ResizeObserver` taklidi eklendi.
 
-### [ ] T16 — Erişilebilirlik ve cila
+### [x] T16 — Erişilebilirlik ve cila
 Odak halkası, `aria-*`, klavye ile tüm akış, kontrast (iki temada), animasyon sadeleştirme, uygulama simgesi, pencere min boyutu.
 **Test:** temel a11y kontrolleri (axe veya benzeri).
+_Bitiş notu:_ Tüm UI metinleri `tr.ts`'ye taşındı. Liste `role="list"`/`listitem` (iç içe etkileşim ihlali giderildi), TipTap alanına `aria-label` + `aria-multiline`, sonuç sayısı `aria-live` ile duyurulur, onay penceresi `role="alertdialog"` + Esc ile kapanır. `prefers-reduced-motion` desteği, `--danger` rengi (açık `#b91c1c`, koyu `#f87171`) ve soluk metin `#6b655a` ile AA kontrastı sağlandı. Simge `assets/icon.png`'den `pnpm tauri icon` ile üretildi, `bundle.icon` bağlandı; pencere min 600×400. Ctrl+N artık her yerde, Esc editörde önce kaydedip listeye dönüyor. Testler: 4 axe kontrolü + 8 kontrast kontrolü + Esc/Ctrl+N e2e.
 
 ### [ ] T17 — AppImage (Fedora / Arch, Wayland)
 - `tauri.conf.json` bundle hedefi `appimage`; `scripts/build-appimage.sh`

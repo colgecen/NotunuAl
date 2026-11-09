@@ -12,6 +12,7 @@ export default {
         line: 'var(--line)',
         accent: 'var(--accent)',
         paper: 'var(--paper)',
+        danger: 'var(--danger)',
       },
     },
   },

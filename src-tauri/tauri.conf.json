@@ -27,6 +27,15 @@
   "bundle": {
     "active": true,
     "targets": ["appimage"],
-    "icon": []
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "Productivity",
+    "shortDescription": "Hızlı, çevrimdışı not alma",
+    "longDescription": "NotunuAl! klavye odaklı, tamamen çevrimdışı çalışan bir not alma uygulamasıdır."
   }
 }
