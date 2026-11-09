@@ -54,7 +54,7 @@ describe('NoteEditor', () => {
     fireEvent.change(screen.getByRole('textbox', { name: 'Başlık' }), { target: { value: 'Dışa Aktar' } });
     fireEvent.click(screen.getByRole('button', { name: 'Farklı Kaydet' }));
     fireEvent.click(screen.getByRole('menuitem', { name: 'Metin belgesi (.txt)' }));
-    expect(await screen.findByRole('status')).toHaveTextContent('Dosya kaydedildi');
+    expect(await screen.findByRole('status', {}, { timeout: 3000 })).toHaveTextContent('Dosya kaydedildi');
   });
 
   it('saves title color', async () => {

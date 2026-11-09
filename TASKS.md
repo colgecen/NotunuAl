@@ -151,7 +151,7 @@ Odak halkası, `aria-*`, klavye ile tüm akış, kontrast (iki temada), animasyo
 **Test:** temel a11y kontrolleri (axe veya benzeri).
 _Bitiş notu:_ Tüm UI metinleri `tr.ts`'ye taşındı. Liste `role="list"`/`listitem` (iç içe etkileşim ihlali giderildi), TipTap alanına `aria-label` + `aria-multiline`, sonuç sayısı `aria-live` ile duyurulur, onay penceresi `role="alertdialog"` + Esc ile kapanır. `prefers-reduced-motion` desteği, `--danger` rengi (açık `#b91c1c`, koyu `#f87171`) ve soluk metin `#6b655a` ile AA kontrastı sağlandı. Simge `assets/icon.png`'den `pnpm tauri icon` ile üretildi, `bundle.icon` bağlandı; pencere min 600×400. Ctrl+N artık her yerde, Esc editörde önce kaydedip listeye dönüyor. Testler: 4 axe kontrolü + 8 kontrast kontrolü + Esc/Ctrl+N e2e.
 
-### [ ] T17 — AppImage (Fedora / Arch, Wayland)
+### [x] T17 — AppImage (Fedora / Arch, Wayland)
 - `tauri.conf.json` bundle hedefi `appimage`; `scripts/build-appimage.sh`
 - `README.md`: derleme bağımlılıkları (Fedora/Arch), çalıştırma (`chmod +x`), Wayland notları (`WEBKIT_DISABLE_DMABUF_RENDERER=1` yalnızca geçici çözüm olarak)
 - CI: GitHub Actions, `ubuntu-22.04` üzerinde `verify` + AppImage derleme + artifact yükleme
@@ -159,6 +159,7 @@ _Bitiş notu:_ Tüm UI metinleri `tr.ts`'ye taşındı. Liste `role="list"`/`lis
 
 **Kabul:** `pnpm tauri build` AppImage üretir; Fedora ve Arch'ta Wayland oturumunda açılır (elle doğrulama).
 **Commit:** `build(appimage): add AppImage bundling, CI and Wayland notes [T17]`
+_Bitiş notu:_ `README.md` (özellikler, kısayollar, Fedora/Arch bağımlılıkları, çalıştırma, Wayland notları, gizlilik) ve `scripts/build-appimage.sh` (Arch'ı algılayıp `NO_STRIP=true`, `--verify` seçeneği, artifact listesi) eklendi. `package.json` içine `build:appimage` eklendi. `.github/workflows/ci.yml` üç iş içeriyor: `verify`, `e2e` (Chromium) ve `appimage` (`ubuntu-22.04` + Tauri bağımlılıkları + Rust cache + artifact yükleme). Yerel `pnpm tauri build` eksik `webkit2gtk4.1`/`libsoup-3.0` nedeniyle çalıştırılamadı (bkz. Blokajlar); AppImage derlemesi CI'da yapılır. `pnpm verify` yeşil: 18 dosya, 62 test.
 
 ### [ ] T18 — Sürüm 0.1.0
 `CHANGELOG.md`, sürüm numarası, etiket (`v0.1.0`), kısa kullanım kılavuzu (kısayollar tablosu).

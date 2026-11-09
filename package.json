@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "build:web": "vite build",
+    "build:appimage": "bash scripts/build-appimage.sh",
     "gen:pdf-fonts": "node scripts/generate-pdf-fonts.mjs",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build:web"
   },
