@@ -14,7 +14,6 @@ import { tr } from '../i18n/tr';
 import EditorHeader from './EditorHeader';
 import EditorToolbar from './EditorToolbar';
 import TitleField from './TitleField';
-import { CalendarIcon } from './icons';
 import type { ExportFormat } from '../services/export';
 import { cleanFileName } from '../services/export/txt';
 import type { FontKey } from '../types';
@@ -237,14 +236,17 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
         onBack={() => void handleClose()}
         onDelete={() => onDelete?.(latestNote.current.id)}
       />
-      <div className="shrink-0 border-b border-line bg-paper">
+      <div className="shrink-0">
         <TitleField
           title={note.title}
           titleColor={note.titleColor}
           titleFont={note.titleFont}
+          date={note.date}
+          words={words}
           onTitleChange={(title) => updateNote({ title })}
           onTitleColorChange={(titleColor) => updateNote({ titleColor })}
           onTitleFontChange={(titleFont) => updateNote({ titleFont })}
+          onDateChange={(date) => updateNote({ date })}
         />
         <EditorToolbar
           editor={editor}
@@ -253,45 +255,12 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
           onFontChange={handleFontChange}
           onFontSizeChange={handleFontSizeChange}
         />
-        <div className="border-t border-line bg-surface" role="group" aria-label={tr.noteMetaLabel}>
-          <div className="col flex flex-wrap items-center gap-2 py-1.5">
-            {note.date ? (
-              <>
-                <CalendarIcon className="h-4 w-4 text-muted" />
-                <input
-                  type="date"
-                  aria-label={tr.dateLabel}
-                  value={note.date}
-                  onChange={(e) => updateNote({ date: e.target.value || null })}
-                  className="field"
-                />
-                <button
-                  type="button"
-                  className="btn-ghost"
-                  onClick={() => updateNote({ date: null })}
-                >
-                  {tr.removeDate}
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                className="btn-ghost"
-                onClick={() => updateNote({ date: new Date().toISOString().slice(0, 10) })}
-              >
-                <CalendarIcon className="h-4 w-4" />
-                {tr.addDate}
-              </button>
-            )}
-            <p className="ml-auto text-xs tabular-nums text-muted">{tr.wordCount(words)}</p>
-          </div>
-        </div>
       </div>
 
-      <div className="scroll-slim min-h-0 flex-1 overflow-y-auto py-4">
-        <div className="col">
-          <div className="min-h-full rounded-card border border-line bg-paper shadow-panel">
-            <EditorContent editor={editor} />
+      <div className="scroll-slim min-h-0 flex-1 overflow-y-auto bg-bg py-4">
+        <div className="col h-full">
+          <div className="mx-auto flex h-full min-h-[360px] max-w-3xl flex-col overflow-hidden rounded-window border border-line bg-paper shadow-panel">
+            <EditorContent editor={editor} className="min-h-0 flex-1" />
           </div>
         </div>
       </div>

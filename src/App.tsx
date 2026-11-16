@@ -96,7 +96,7 @@ export default function App() {
         </TopBar>
         <main className="min-h-0 flex-1">
           <div className="col flex h-full flex-col py-4">
-            <div className="card flex min-h-0 flex-1 flex-col overflow-hidden shadow-panel">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-window border border-line bg-paper shadow-panel">
               {viewMode === 'icons' ? (
                 <NoteGrid
                   notes={results}
@@ -108,9 +108,10 @@ export default function App() {
                 />
               ) : (
                 <NoteList
+                  key={viewMode}
                   notes={results}
                   selectedIndex={selectedIndex}
-                  spacious={viewMode === 'home'}
+                  variant={viewMode === 'home' ? 'home' : 'rows'}
                   searching={search.trim() !== ''}
                   onOpen={openNote}
                   onDelete={requestDelete}

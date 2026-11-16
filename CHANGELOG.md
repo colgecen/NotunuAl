@@ -3,6 +3,26 @@
 Bu proje [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) biçimini izler ve
 [Anlamsal Sürümleme](https://semver.org/lang/tr/) kullanır.
 
+## [Yayınlanmamış]
+
+### Değişti
+
+- Arayüz macOS esintili grafit temaya geçirildi: gri/beyaz/siyah palet, segmentli
+  görünüm kontrolü, yumuşak gölgeler, belge sayfası düzeni ve paketli Inter arayüz yazı tipi.
+- Uygulama simgesi grafit/beyaz squircle olarak yenilendi.
+- `Satır satır` görünümü iki satırlı liste, `Uygulamanın ana hali` tek satırlı
+  başlık + sağda açıklama olarak ayrıştırıldı; varsayılan SPEC'e uygun olarak satır satır yapıldı.
+
+### Düzeltildi
+
+- Listede tarih artık `16 Kas 2026` gibi okunur biçimde gösteriliyor.
+- Biçim araç çubuğundaki taşan yazı boyutu göstergesi gruplandırıldı.
+- `Enter` kısayolunun odaklı düğme veya onay penceresiyle çakışması engellendi.
+- `Ctrl+K` tarayıcı varsayılanını engelliyor; `Farklı Kaydet` menüsü dışarı tıklama ve
+  `Esc` ile kapanıyor, `Esc` editörü kapatmıyor.
+- Simge görünümünde seçili kart görünür alana kaydırılıyor.
+- Başlık alanındaki ağır odak halkası inceltildi; silme diyaloğu kapanınca odak geri veriliyor.
+
 ## [0.1.0] - 2026-11-09
 
 İlk sürüm.

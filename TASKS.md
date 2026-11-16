@@ -168,6 +168,31 @@ _Bitiş notu:_ `CHANGELOG.md` (Keep a Changelog biçimi, 0.1.0 özellikleri) ve 
 
 ---
 
+## Aşama 5 — Tasarım ve cila
+
+### [x] T19 — macOS (grafit) tema ve arayüz hata düzeltmeleri
+Arayüzü macOS esintili gri/beyaz/siyah (grafit) bir tasarıma geçir:
+- CSS token'ları, segmentli görünüm kontrolü, arama alanı, düğmeler, gölgeler ve
+  belge sayfası düzeni; Inter arayüz yazı tipi (paketli).
+- Editör başlığı ile içerik sütununun hizalanması; biçim araç çubuğunun gruplanması
+  (orphan `16px` taşması yok).
+- Uygulama simgesini grafit/beyaz macOS squircle olarak yenile.
+
+Düzeltmeler:
+- Listede ISO tarihi yerine okunur Türkçe tarih (`16 Kas 2026`).
+- SPEC'e uygun varsayılan görünüm: **satır satır**; satır ve ana hal modlarını ayır.
+- `Enter` kısayolunun odaklı düğme/menü tıklamasıyla çakışmasını engelle.
+- `Ctrl+K` için `preventDefault`.
+- `Farklı Kaydet` menüsü: dışarı tıklayınca ve `Esc` ile kapan; `Esc` editörü kapatmasın.
+- Simge görünümünde seçili kartı görünür alana kaydır.
+- Başlık alanındaki dev odak halkasını ince alt çizgiye çevir; silme diyaloğunda odağı geri ver.
+
+**Kabul:** `pnpm verify` ve `pnpm test:e2e` yeşil; iki tema AA kontrast; 600×400 ve 1000×700'de taşma yok.
+**Commit:** `style(ui): rework theme with macOS graphite design and fix UI issues [T19]`
+_Bitiş notu:_ Grafit palet ve macOS düzeni uygulandı: Inter arayüz yazı tipi, segmentli görünüm kontrolü, belge sayfası, yeni squircle simge. Düzeltmeler: tarih biçimi, varsayılan `rows`, `Enter`/odak çakışması, `Ctrl+K` varsayılanı, menü dış tık/Esc, grid kaydırma, başlık odağı, silme diyaloğunda odak tuzağı ve geri verme. `--muted` seçili satır/kontrol zemininde AA'ya çekildi. Doğrulama: 20 dosya 74 test + 6 e2e; `pnpm verify` yeşil; 600×400 ve 1000×700'de yatay taşma yok.
+
+---
+
 ## Elle doğrulama listesi (T17 sonrası, insan yapar)
 
 - [ ] Fedora (Wayland): AppImage açılıyor, pencere net, yazı tipleri doğru
@@ -187,6 +212,8 @@ _Bitiş notu:_ `CHANGELOG.md` (Keep a Changelog biçimi, 0.1.0 özellikleri) ve 
 |---|---|---|---|
 | 2026-11-08 | T08 | Başlık biçimlendirmesi renk + yazı tipiyle sınırlandı. | `Note.title` düz metin; liste kalın başlık ve açıklama için TipTap biçimleri yeterli. |
 | 2026-11-08 | T13 | PDF fontları TTF yerine base64 TS modülü olarak gömüldü; export kütüphaneleri dinamik import chunk. | CSP `connect-src 'none'` fetch'i engeller; ana bundle açılış hızı korunur. |
+| 2026-11-16 | T19 | macOS temasında vurgu rengi grafit (açıkta siyah, koyuda beyaz); mavi/mor sistem vurgusu kullanılmadı. Arayüz yazı tipi olarak paketli Inter eklendi. | Kullanıcı gri/beyaz/siyah istedi; Fedora/Arch'ta tutarlı tipografi için font paketlendi. |
+| 2026-11-16 | T19 | "Satır satır" iki satırlı (başlık + alt açıklama), "Uygulamanın ana hali" tek satırlı (başlık + sağda açıklama) olarak ayrıştırıldı. | SPEC §2.4'teki iki modun görsel olarak farklı olması ve varsayılanın `rows` olması gerekir. |
 
 ## Blokajlar
 

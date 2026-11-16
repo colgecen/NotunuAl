@@ -25,7 +25,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'light',
-  viewMode: 'home',
+  viewMode: 'rows',
   bodyFontSize: 16,
   bodyFont: 'arial',
 };

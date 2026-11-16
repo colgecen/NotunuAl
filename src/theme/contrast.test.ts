@@ -49,6 +49,11 @@ describe.each([
     expect(contrast(theme.muted, theme.paper)).toBeGreaterThanOrEqual(4.5);
   });
 
+  it('soluk metin seçili satır ve kontrol zemininde de AA geçer', () => {
+    expect(contrast(theme.muted, theme.selection)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(theme.muted, theme.control)).toBeGreaterThanOrEqual(4.5);
+  });
+
   it('tehlike rengi AA geçer', () => {
     expect(contrast(theme.danger, theme.paper)).toBeGreaterThanOrEqual(4.5);
     expect(contrast(theme.danger, theme.bg)).toBeGreaterThanOrEqual(4.5);

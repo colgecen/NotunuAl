@@ -46,7 +46,7 @@ Seçim **otomatik kaydedilir**, uygulama yeniden açılınca hatırlanır.
 
 - Açık/koyu tema; **fare tıklamasıyla** veya **Ctrl+K** ile değişir.
 - Seçim kalıcıdır. İlk açılışta sistem temasına (`prefers-color-scheme`) bakılır.
-- Not defteri teması: açık temada kâğıt rengi / krem tonları, koyu temada koyu gri/lacivert tonları. Başlık altı çizgisi ve vurgu renkleri tema ile uyumlu.
+- Not defteri teması: macOS esintili **grafit** palet; açık temada gri pencere zemini ve beyaz içerik, koyu temada nötr kömür tonları. Vurgu rengi açıkta siyah, koyuda beyazdır; başlık altı çizgisi ve ayırıcılar tema ile uyumludur.
 
 ## 4. Yeni not
 

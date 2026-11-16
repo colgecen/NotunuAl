@@ -16,6 +16,7 @@
 | Yerel dosya | `@tauri-apps/plugin-dialog` + `plugin-fs` | Native "Farklı Kaydet" penceresi |
 | Liste sanallaştırma | `@tanstack/react-virtual` | 5.000+ notta liste DOM'unu sabit tutar, arama <100 ms |
 | Fontlar | `@fontsource/arimo`, `@fontsource/tinos`, `@fontsource/gelasio`, `@fontsource/cousine`, `@fontsource/dejavu-sans` | Linux'ta Arial/Times/Georgia/Courier/Verdana için paketli, açık lisanslı karşılıklar |
+| Arayüz yazı tipi | `@fontsource-variable/inter` | macOS benzeri nötr tipografi; Fedora/Arch'ta tutarlı, paketli (ağ yok) |
 | Test | **Vitest**, Testing Library, `fake-indexeddb`, **Playwright** | Birim → bileşen → uçtan uca |
 | Lint/format | ESLint + Prettier | Tutarlı kod |
 | Paket yöneticisi | **pnpm** | Hızlı, disk dostu |
@@ -139,10 +140,15 @@ export interface Settings {
 - Boş not (başlık + gövde boş) çıkışta silinir.
 
 ### 5.4 Tema
-- `<html data-theme="light|dark">`; renkler CSS değişkenleri (`--bg`, `--fg`, `--muted`, `--line`, `--accent`).
+- `<html data-theme="light|dark">`; renkler CSS değişkenleri (`--bg`, `--paper`, `--surface`, `--chrome`, `--control`, `--fg`, `--muted`, `--line`, `--selection`, `--accent`, `--danger`).
+- macOS esintili **grafit** palet: açık temada gri pencere zemini + beyaz içerik, koyu temada nötr kömür tonları. Vurgu rengi açıkta siyah, koyuda beyazdır; mavi/mor kullanılmaz.
+- Segmentli kontroller, ince ayırıcılar, yumuşak gölgeler ve belge sayfası düzeni ortak CSS sınıflarıyla (`segmented`, `field`, `pill`, `title-input`) sağlanır.
+- Arayüz yazı tipi paketli **Inter**; kullanıcının seçtiği not yazı tipleri yalnızca editör içeriğine uygulanır.
 - Tailwind bu değişkenlere bağlanır. Tema değişimi anında, yanıp sönme olmadan (ilk boyamadan önce uygulanır).
 
 ### 5.5 Yazı tipleri
+- Arayüz (başlık çubuğu, liste, düğmeler, araç çubuğu) paketli **Inter** kullanır.
+- Aşağıdaki beş font yalnızca not başlığı ve gövdesi için seçeneklerdir.
 - Kullanıcıya görünen isimler: Arial, Times New Roman, Georgia, Courier New, Verdana.
 - Linux'ta bu fontlar kurulu olmayabilir. Bu yüzden **metrik uyumlu açık lisanslı karşılıklar paketlenir** (`@font-face`, OFL lisanslı):
   - Arial → Liberation Sans

@@ -13,23 +13,20 @@ export default function ViewModeSwitch() {
   const viewMode = useSettingsStore((s) => s.viewMode);
   const setViewMode = useSettingsStore((s) => s.setViewMode);
   return (
-    <div
-      className="inline-flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5"
-      role="group"
-      aria-label={tr.viewModeLabel}
-    >
+    <div className="segmented" role="group" aria-label={tr.viewModeLabel}>
       {MODES.map(({ mode, icon: Icon }) => (
         <button
           key={mode}
           type="button"
           aria-pressed={viewMode === mode}
           aria-label={tr.viewMode[mode]}
+          title={tr.viewMode[mode]}
           data-pressed={viewMode === mode}
-          className="btn-toggle gap-1.5 px-2.5"
+          className="segment"
           onClick={() => setViewMode(mode)}
         >
           <Icon className="h-3.5 w-3.5" />
-          {tr.viewMode[mode]}
+          <span className="hidden md:inline">{tr.viewMode[mode]}</span>
         </button>
       ))}
     </div>

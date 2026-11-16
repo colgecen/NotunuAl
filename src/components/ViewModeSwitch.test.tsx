@@ -2,8 +2,13 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import ViewModeSwitch from './ViewModeSwitch';
 import { useSettingsStore } from '../store/settingsStore';
 import { loadSettings } from '../services/settingsService';
+import { DEFAULT_SETTINGS } from '../types';
 
 describe('ViewModeSwitch', () => {
+  it('SPEC gereği varsayılan görünüm satır satırdır', () => {
+    expect(DEFAULT_SETTINGS.viewMode).toBe('rows');
+  });
+
   it('changes and persists view mode', () => {
     useSettingsStore.getState().setViewMode('rows');
     render(<ViewModeSwitch />);

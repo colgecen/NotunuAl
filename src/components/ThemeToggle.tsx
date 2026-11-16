@@ -12,7 +12,7 @@ export default function ThemeToggle() {
       title={`${tr.themeToggle} — ${tr.shortcutHint('Ctrl+K')}`}
       aria-pressed={theme === 'dark'}
       onClick={toggleTheme}
-      className="btn-icon shrink-0 border-line"
+      className="btn-icon shrink-0 border border-line bg-paper"
     >
       {theme === 'light' ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
     </button>

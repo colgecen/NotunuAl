@@ -71,4 +71,24 @@ describe('shortcuts', () => {
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(useUIStore.getState().search).toBe('');
   });
+
+  it('does not open a note with Enter when a list button has focus', async () => {
+    await saveNote(makeNote('a', 'A', 1));
+    render(<App />);
+    await waitFor(() => expect(useUIStore.getState().results.length).toBe(1));
+    fireEvent.keyDown(screen.getByRole('button', { name: 'A notunu sil' }), { key: 'Enter' });
+    expect(useUIStore.getState().screen).toBe('list');
+  });
+
+  it('prevents the browser default for Ctrl+K while toggling the theme', () => {
+    render(<App />);
+    const event = new KeyboardEvent('keydown', {
+      key: 'k',
+      ctrlKey: true,
+      cancelable: true,
+      bubbles: true,
+    });
+    window.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+  });
 });

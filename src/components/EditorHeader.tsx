@@ -23,10 +23,14 @@ export default function EditorHeader({
   onDelete,
 }: Props) {
   return (
-    <div className="border-b border-line bg-surface" role="group" aria-label={tr.noteActionsLabel}>
-      <div className="col flex flex-wrap items-center gap-2 py-2">
+    <div
+      className="shrink-0 border-b border-line bg-chrome"
+      role="group"
+      aria-label={tr.noteActionsLabel}
+    >
+      <div className="col flex min-h-[52px] flex-wrap items-center gap-2 py-2">
         <button type="button" aria-label={tr.back} className="btn-ghost" onClick={onBack}>
-          <ArrowLeftIcon className="h-4 w-4" />
+          <ArrowLeftIcon className="h-3.5 w-3.5" />
           {tr.back}
         </button>
         <span className="sep" aria-hidden="true" />
@@ -40,25 +44,21 @@ export default function EditorHeader({
           {tr.save}
         </button>
         <SaveAsMenu onSelect={onSelectFormat} />
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex min-w-0 items-center gap-2">
           {notice ? (
-            <span role="status" className="text-xs text-muted">
+            <span role="status" className="max-w-[220px] truncate text-[11px] text-muted">
               {notice}
             </span>
           ) : null}
           {savedFlash ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-line bg-paper px-2 py-0.5 text-xs text-muted">
-              <CheckIcon className="h-3.5 w-3.5" />
+            <span className="pill">
+              <CheckIcon className="h-3 w-3" />
               {tr.saved}
             </span>
           ) : null}
           {dirty ? (
-            <span
-              aria-label={tr.unsavedChanges}
-              title={tr.unsavedChanges}
-              className="inline-flex items-center gap-1 rounded-full border border-line bg-paper px-2 py-0.5 text-xs text-muted"
-            >
-              <span aria-hidden="true">{tr.dirty}</span>
+            <span aria-label={tr.unsavedChanges} title={tr.unsavedChanges} className="pill">
+              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent" />
               {tr.unsavedChanges}
             </span>
           ) : null}
@@ -68,8 +68,8 @@ export default function EditorHeader({
             className="btn-danger"
             onClick={() => onDelete?.()}
           >
-            <TrashIcon className="h-4 w-4" />
-            {tr.delete}
+            <TrashIcon className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{tr.delete}</span>
           </button>
         </div>
       </div>

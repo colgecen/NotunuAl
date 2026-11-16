@@ -11,12 +11,12 @@ interface Props {
   onOpen?: (id: string) => void;
   onDelete?: (id: string) => void;
   onNewNote?: () => void;
-  spacious?: boolean;
+  variant?: 'rows' | 'home';
   searching?: boolean;
 }
 
-const ROW_HEIGHT = 40;
-const SPACIOUS_ROW_HEIGHT = 56;
+const ROW_HEIGHT = 58;
+const HOME_ROW_HEIGHT = 46;
 
 export default function NoteList({
   notes,
@@ -24,7 +24,7 @@ export default function NoteList({
   onOpen,
   onDelete,
   onNewNote,
-  spacious,
+  variant = 'rows',
   searching,
 }: Props) {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -33,7 +33,7 @@ export default function NoteList({
   const virtualizer = useVirtualizer({
     count: notes.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => (spacious ? SPACIOUS_ROW_HEIGHT : ROW_HEIGHT),
+    estimateSize: () => (variant === 'home' ? HOME_ROW_HEIGHT : ROW_HEIGHT),
     overscan: 8,
     // jsdom'da ölçüm yok; gerçek tarayıcıda ResizeObserver devralır.
     initialRect: { width: 800, height: 600 },
@@ -81,7 +81,7 @@ export default function NoteList({
               <NoteRow
                 note={note}
                 selected={item.index === selectedIndex}
-                spacious={spacious}
+                variant={variant}
                 onClick={onOpen}
                 onDelete={onDelete}
               />
