@@ -1,6 +1,6 @@
 <h1 align="center">NotunuAl!</h1>
 
-<p align="center">An offline, keyboard-first note-taking desktop app for Linux with rich text, instant Turkish-aware search, and export to five formats.</p>
+<p align="center">Offline, keyboard-first note-taking app for Linux with rich text.</p>
 
 ## Screenshots
 
