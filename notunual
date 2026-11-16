@@ -87,6 +87,8 @@ ensure_deps() {
 run_app() {
   ensure_node
   ensure_deps
+  # Make the app visible in the system application menu on first source run.
+  install_desktop_entry
   cd "$ROOT"
   # exec replaces this shell, so Ctrl+C reaches the app directly.
   exec pnpm tauri dev "$@"
