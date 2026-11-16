@@ -107,6 +107,8 @@ The license and AI-generated badges are small static SVGs in `docs/img/`. They a
 
 ## Installation
 
+Source builds need Node.js 22+, pnpm 11+, Rust, and the Tauri WebKitGTK packages (Fedora: `webkit2gtk4.1-devel`, `libappindicator-gtk3-devel`, `librsvg2-devel`; Arch: `webkit2gtk-4.1`, `libappindicator-gtk3`, `librsvg`).
+
 Build and run from source:
 
 ```bash
