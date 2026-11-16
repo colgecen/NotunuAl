@@ -29,7 +29,7 @@ export default function TitleField({
   return (
     <div className="shrink-0 border-b border-line bg-paper">
       <div className="col">
-        <div className="mx-auto w-full max-w-3xl px-6 pb-3 pt-4 sm:px-11">
+        <div className="mx-auto w-full max-w-5xl px-6 pb-3 pt-4 sm:px-11">
           <input
             autoFocus
             type="text"

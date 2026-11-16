@@ -41,6 +41,14 @@ describe('NoteEditor', () => {
     await waitFor(async () => expect(await getNote(note.id)).toBeUndefined());
   });
 
+  it('does not mark an existing note dirty when it is opened', async () => {
+    const note = createNote({ title: 'Mevcut not', bodyText: 'içerik' });
+    await saveNote(note);
+    render(<NoteEditor noteId={note.id} onClose={() => {}} />);
+    expect(await screen.findByDisplayValue('Mevcut not')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Kaydedilmemiş değişiklik')).not.toBeInTheDocument();
+  });
+
   it('adds and removes date', async () => {
     render(<NoteEditor noteId={null} onClose={() => {}} />);
     fireEvent.click(screen.getByRole('button', { name: 'Tarih ekle' }));

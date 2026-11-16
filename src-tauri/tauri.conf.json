@@ -13,10 +13,10 @@
     "windows": [
       {
         "title": "NotunuAl!",
-        "width": 1000,
-        "height": 700,
-        "minWidth": 600,
-        "minHeight": 400,
+        "width": 1400,
+        "height": 980,
+        "minWidth": 840,
+        "minHeight": 560,
         "resizable": true
       }
     ],

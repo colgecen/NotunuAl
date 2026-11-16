@@ -131,7 +131,7 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
       dirtyRef.current = false;
       setNote(next);
       setDirty(false);
-      if (editor) editor.commands.setContent(next.body);
+      if (editor) editor.commands.setContent(next.body, { emitUpdate: false });
       setLoaded(true);
     });
     return () => {
@@ -259,7 +259,7 @@ export default function NoteEditor({ noteId, onClose, onDelete }: Props) {
 
       <div className="scroll-slim min-h-0 flex-1 overflow-y-auto bg-bg py-4">
         <div className="col h-full">
-          <div className="mx-auto flex h-full min-h-[360px] max-w-3xl flex-col overflow-hidden rounded-window border border-line bg-paper shadow-panel">
+          <div className="mx-auto flex h-full min-h-[360px] max-w-5xl flex-col overflow-hidden rounded-window border border-line bg-paper shadow-panel">
             <EditorContent editor={editor} className="min-h-0 flex-1" />
           </div>
         </div>

@@ -59,6 +59,9 @@ body,
 }
 
 html {
+  /* Tüm arayüzü (yazı, boşluk, ikon, kenarlık) %140 ölçekler.
+     Masaüstü penceresi de aynı oranda büyütüldüğü için yerleşim korunur. */
+  zoom: 1.4;
   background: var(--bg);
 }
 
