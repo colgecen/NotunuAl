@@ -1,0 +1,171 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  guard:
+    name: Validate tag
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require an annotated tag on master
+        run: |
+          set -euo pipefail
+          test "$(git cat-file -t "$GITHUB_REF_NAME")" = "tag" || {
+            echo "ERROR: $GITHUB_REF_NAME is not an annotated tag." >&2
+            exit 1
+          }
+          git fetch origin master --no-tags
+          TAG_COMMIT="$(git rev-list -n 1 "$GITHUB_REF_NAME")"
+          git merge-base --is-ancestor "$TAG_COMMIT" origin/master || {
+            echo "ERROR: $GITHUB_REF_NAME is not on master." >&2
+            exit 1
+          }
+          VERSION="${GITHUB_REF_NAME#v}"
+          test "$(python3 -c "import json; print(json.load(open('package.json'))['version'])")" = "$VERSION" || {
+            echo "ERROR: package.json version does not match $GITHUB_REF_NAME." >&2
+            exit 1
+          }
+          test "$(python3 -c "import json; print(json.load(open('src-tauri/tauri.conf.json'))['version'])")" = "$VERSION" || {
+            echo "ERROR: tauri.conf.json version does not match $GITHUB_REF_NAME." >&2
+            exit 1
+          }
+          grep -qx "version = \"$VERSION\"" src-tauri/Cargo.toml || {
+            echo "ERROR: Cargo.toml version does not match $GITHUB_REF_NAME." >&2
+            exit 1
+          }
+
+  build:
+    name: Linux ${{ matrix.arch }}
+    needs: guard
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-22.04
+            appindicator: libappindicator3-dev
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+            appindicator: libayatana-appindicator3-dev
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev \
+            ${{ matrix.appindicator }} \
+            librsvg2-dev \
+            patchelf \
+            libxdo-dev \
+            libssl-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            rpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Verify
+        run: pnpm verify
+
+      - name: Build AppImage and RPM
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: 1
+        run: pnpm tauri build --bundles appimage,rpm --ci
+
+      - name: Package assets
+        run: |
+          set -euo pipefail
+          APP=notunual
+          VERSION="${GITHUB_REF_NAME#v}"
+          ARCH="${{ matrix.arch }}"
+          BUNDLE=src-tauri/target/release/bundle
+          mkdir -p release
+          APPIMAGE="$(find "$BUNDLE/appimage" -maxdepth 1 -name '*.AppImage' -print -quit)"
+          RPM_FILE="$(find "$BUNDLE/rpm" -maxdepth 1 -name '*.rpm' -print -quit)"
+          test -n "$APPIMAGE"
+          test -n "$RPM_FILE"
+          cp "$APPIMAGE" "release/${APP}-${VERSION}-linux-${ARCH}.AppImage"
+          cp "$RPM_FILE" "release/${APP}-${VERSION}-linux-${ARCH}.rpm"
+          STAGE="release/${APP}-${VERSION}"
+          mkdir -p "$STAGE"
+          cp src-tauri/target/release/notunual "$STAGE/${APP}"
+          cp README.md LICENSE assets/icon.png "$STAGE/"
+          tar -C release -czf "release/${APP}-${VERSION}-linux-${ARCH}.tar.gz" "${APP}-${VERSION}"
+          rm -rf "$STAGE"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}
+          path: release/*
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: release
+          merge-multiple: true
+
+      - name: Add source archive
+        run: |
+          set -euo pipefail
+          APP=notunual
+          VERSION="${GITHUB_REF_NAME#v}"
+          git archive --format=tar.gz --prefix="${APP}-${VERSION}/" \
+            -o "release/${APP}-${VERSION}-source.tar.gz" HEAD
+
+      - name: Generate SHA256SUMS
+        run: |
+          set -euo pipefail
+          cd release
+          rm -f SHA256SUMS
+          sha256sum -- * > SHA256SUMS
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-rc.') }}
+          files: release/*
+          token: ${{ secrets.GITHUB_TOKEN }}

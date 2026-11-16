@@ -1,0 +1,424 @@
+#!/usr/bin/env bash
+#
+# notunual - run and build tool (standard launcher for NotunuAl!)
+#
+# Behaviour:
+#   ./notunual                  Run the app from source (unbuilt). Stop it with Ctrl+C.
+#   notunual                    Open the build menu (after one-time --install, no "./" needed).
+#
+# Commands (reserved flags; every other argument is passed to the app):
+#   ./notunual --install        Install the `notunual` command into ~/.local/bin
+#                               and register the app (icon + launcher entry) as a system app
+#   ./notunual --uninstall      Remove that command, the launcher entry and the icon
+#   ./notunual --build          Interactive build menu
+#   ./notunual --build <os> <format> [arch]
+#   ./notunual --build --list   List all build targets
+#
+# Targets:
+#   linux   : appimage | targz | rpm | source | binary | all
+#   arch    : x86_64 | aarch64 | all          (default: host architecture)
+#
+# Assets are written to build/dist/ as <project>-<version>-<os>-<arch>.<ext>
+# and a SHA256SUMS file is generated next to them.
+#
+# The arm64 assets for releases are built natively by .github/workflows/release.yml;
+# local Tauri cross-builds need a full cross toolchain (Rust target + WebKit libs).
+#
+set -euo pipefail
+
+# ---- per-project settings (the only part that changes between projects) ----
+APP="notunual"
+PRODUCT="NotunuAl!"
+SUMMARY="Fast, keyboard-first, offline note-taking app"
+LICENSE_ID="MIT"
+WINDOWS_SUPPORTED="no"
+ICON="assets/icon.png"
+ICON_RADIUS_PCT="20"
+
+# ---- locate the repository root (resolves symlinks) ----
+resolve_root() {
+  local src="${BASH_SOURCE[0]}"
+  while [ -L "$src" ]; do
+    local dir
+    dir="$(cd -P "$(dirname "$src")" && pwd)"
+    src="$(readlink "$src")"
+    [[ "$src" != /* ]] && src="$dir/$src"
+  done
+  cd -P "$(dirname "$src")" && pwd
+}
+ROOT="$(resolve_root)"
+cd "$ROOT"
+DIST="$ROOT/build/dist"
+STAGE="$ROOT/build/.stage"
+VERSION="${VERSION:-$(node -p "require('./package.json').version" 2>/dev/null || echo "0.1.0")}"
+
+host_arch() {
+  case "$(uname -m)" in
+    x86_64|amd64) echo x86_64 ;;
+    aarch64|arm64) echo aarch64 ;;
+    *) echo "unsupported" ;;
+  esac
+}
+HOST_ARCH="$(host_arch)"
+ARCHS_DEFAULT="$HOST_ARCH"
+
+die() { echo "ERROR: $*" >&2; exit 1; }
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || die "$1 not found. $2"
+}
+
+ensure_node() {
+  need node "Install Node.js 20 or newer."
+  need pnpm "Install pnpm (https://pnpm.io)."
+}
+
+ensure_deps() {
+  ensure_node
+  if [ ! -d "$ROOT/node_modules" ]; then
+    echo "==> Installing dependencies"
+    ( cd "$ROOT" && pnpm install --frozen-lockfile )
+  fi
+}
+
+# =====================================================================
+# Run mode: start the unbuilt app straight from source
+# =====================================================================
+run_app() {
+  ensure_node
+  ensure_deps
+  cd "$ROOT"
+  # exec replaces this shell, so Ctrl+C reaches the app directly.
+  exec pnpm tauri dev "$@"
+}
+
+# =====================================================================
+# Install / uninstall the bare `notunual` command
+# =====================================================================
+WRAPPER_MARK="# notunual-wrapper"
+DESKTOP_MARK="# notunual-desktop"
+
+# prepare_icon <dest>: write a 512x512 icon to <dest>, rounding square corners (needs ImageMagick).
+prepare_icon() {
+  local src="$ROOT/$ICON" dest="$1" im="" tmp w r corner
+  [ -f "$src" ] || return 1
+  if command -v magick >/dev/null 2>&1; then im="magick"
+  elif command -v convert >/dev/null 2>&1; then im="convert"; fi
+  if [ -z "$im" ]; then
+    echo "NOTE: ImageMagick not found, icon copied without rounding."
+    cp "$src" "$dest"
+    return 0
+  fi
+  tmp="$(mktemp --suffix=.png)"
+  "$im" "$src" -resize 512x512 "$tmp"
+  if command -v identify >/dev/null 2>&1; then
+    w="$(identify -format '%w' "$tmp")"
+    corner="$(identify -format '%[pixel:p{0,0}]' "$tmp" 2>/dev/null || true)"
+  else
+    w=512
+    corner=""
+  fi
+  r=$(( w * ICON_RADIUS_PCT / 100 ))
+  # Is the top-left pixel already transparent? Then the icon is already rounded.
+  case "$corner" in
+    *,0) cp "$tmp" "$dest" ;;
+    *)
+      "$im" "$tmp" -alpha set \
+        \( -size "${w}x${w}" xc:none -fill white \
+           -draw "roundrectangle 0,0 $((w-1)),$((w-1)) $r,$r" \) \
+        -compose DstIn -composite "$dest"
+      ;;
+  esac
+  rm -f "$tmp"
+}
+
+install_desktop_entry() {
+  local apps="$HOME/.local/share/applications"
+  local icons="$HOME/.local/share/icons/hicolor/512x512/apps"
+  mkdir -p "$apps" "$icons"
+  prepare_icon "$icons/$APP.png" || echo "NOTE: icon not found; launcher entry will use the default icon."
+  cat > "$apps/$APP.desktop" << DESKTOP
+$DESKTOP_MARK
+[Desktop Entry]
+Type=Application
+Name=$PRODUCT
+Comment=$SUMMARY
+Exec="$ROOT/$APP"
+Icon=$APP
+Terminal=false
+Categories=Utility;Office;
+StartupWMClass=$PRODUCT
+DESKTOP
+  command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "$apps" 2>/dev/null || true
+  command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+  echo "Installed: $apps/$APP.desktop (appears in the application launcher)"
+}
+
+uninstall_desktop_entry() {
+  local f="$HOME/.local/share/applications/$APP.desktop"
+  rm -f "$HOME/.local/share/icons/hicolor/512x512/apps/$APP.png"
+  if [ -f "$f" ] && grep -q "$DESKTOP_MARK" "$f"; then
+    rm -f "$f"
+    echo "Removed: $f"
+  fi
+  command -v update-desktop-database >/dev/null 2>&1 && \
+    update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+  command -v gtk-update-icon-cache >/dev/null 2>&1 && \
+    gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+}
+
+do_install() {
+  local bindir="$HOME/.local/bin"
+  mkdir -p "$bindir"
+  printf '#!/usr/bin/env bash\n%s\nexec "%s/%s" --build "$@"\n' \
+    "$WRAPPER_MARK" "$ROOT" "$APP" > "$bindir/$APP"
+  chmod +x "$bindir/$APP"
+  install_desktop_entry
+  echo "Installed: $bindir/$APP"
+  case ":$PATH:" in
+    *":$bindir:"*) echo "Done. Type '$APP' in any folder to open the build menu." ;;
+    *)
+      echo "NOTE: $bindir is not in PATH. Add this line to ~/.bashrc:"
+      echo '  export PATH="$HOME/.local/bin:$PATH"'
+      echo "Then open a new terminal or run: source ~/.bashrc"
+      ;;
+  esac
+}
+
+do_uninstall() {
+  local f="$HOME/.local/bin/$APP"
+  if [ -f "$f" ] && grep -q "$WRAPPER_MARK" "$f"; then
+    rm -f "$f"
+    echo "Removed: $f"
+  else
+    echo "Nothing to remove."
+  fi
+  uninstall_desktop_entry
+}
+
+# =====================================================================
+# Helpers
+# =====================================================================
+banner() {
+  echo "=============================================="
+  echo "  $PRODUCT build tool  v$VERSION"
+  echo "=============================================="
+}
+
+list_targets() {
+  echo "linux   : appimage | targz | rpm | source | binary | all"
+  echo "arch    : x86_64 | aarch64 | all (default: $HOST_ARCH)"
+}
+
+usage() {
+  banner
+  echo
+  echo "Usage:"
+  echo "  $APP                          Interactive build menu"
+  echo "  $APP <os> <format> [arch]     Build directly"
+  echo "  $APP --list                   List targets"
+  echo
+  list_targets
+}
+
+target_triple() {
+  case "$1" in
+    x86_64) echo x86_64-unknown-linux-gnu ;;
+    aarch64) echo aarch64-unknown-linux-gnu ;;
+    *) die "Unknown architecture: $1 (valid: x86_64 | aarch64 | all)" ;;
+  esac
+}
+
+target_dir() {
+  local arch="$1"
+  if [ "$arch" = "$HOST_ARCH" ]; then
+    echo "$ROOT/src-tauri/target/release"
+  else
+    echo "$ROOT/src-tauri/target/$(target_triple "$arch")/release"
+  fi
+}
+
+ensure_rpm_tool() {
+  command -v rpmbuild >/dev/null 2>&1 || \
+    die "rpmbuild not found (Fedora: sudo dnf install rpm-build; Debian/Ubuntu: sudo apt install rpm)."
+}
+
+# build_with_tauri <arch> <bundles|-> <no_bundle?>
+build_with_tauri() {
+  local arch="$1" bundles="$2" no_bundle="${3:-no}"
+  local args=(tauri build --ci) triple
+  ensure_deps
+  need cargo "Install Rust with rustup."
+  if [ "$arch" != "$HOST_ARCH" ]; then
+    triple="$(target_triple "$arch")"
+    command -v rustup >/dev/null 2>&1 || die "rustup is required for cross-builds."
+    rustup target list --installed | grep -qx "$triple" || \
+      die "Rust target $triple is not installed (rustup target add $triple) and WebKit cross libs are required."
+    args+=(--target "$triple")
+  fi
+  if [ "$no_bundle" = "yes" ]; then
+    args+=(--no-bundle)
+  else
+    args+=(--bundles "$bundles")
+  fi
+  echo "==> pnpm ${args[*]}"
+  ( cd "$ROOT" && pnpm "${args[@]}" )
+}
+
+collect_appimage() {
+  local arch="$1" dir source
+  dir="$(target_dir "$arch")/bundle/appimage"
+  source="$(find "$dir" -maxdepth 1 -name '*.AppImage' -print -quit 2>/dev/null)"
+  [ -n "$source" ] || die "AppImage output not found in $dir"
+  cp "$source" "$DIST/$APP-$VERSION-linux-$arch.AppImage"
+  echo "==> $DIST/$APP-$VERSION-linux-$arch.AppImage"
+}
+
+collect_rpm() {
+  local arch="$1" dir source
+  dir="$(target_dir "$arch")/bundle/rpm"
+  source="$(find "$dir" -maxdepth 1 -name '*.rpm' -print -quit 2>/dev/null)"
+  [ -n "$source" ] || die "RPM output not found in $dir"
+  cp "$source" "$DIST/$APP-$VERSION-linux-$arch.rpm"
+  echo "==> $DIST/$APP-$VERSION-linux-$arch.rpm"
+}
+
+linux_targz() {
+  local arch="$1" dir binary name stage
+  dir="$(target_dir "$arch")"
+  binary="$dir/notunual"
+  [ -x "$binary" ] || die "Binary not found: $binary (build first)"
+  name="$APP-$VERSION-linux-$arch"
+  stage="$STAGE/$name"
+  rm -rf "$stage"
+  mkdir -p "$stage" "$DIST"
+  cp "$binary" "$stage/$APP"
+  cp "$ROOT/README.md" "$ROOT/LICENSE" "$stage/"
+  [ -f "$ROOT/$ICON" ] && cp "$ROOT/$ICON" "$stage/icon.png"
+  tar -C "$STAGE" -czf "$DIST/$name.tar.gz" "$name"
+  echo "==> $DIST/$name.tar.gz"
+}
+
+linux_binary() {
+  local arch="$1" dir binary
+  dir="$(target_dir "$arch")"
+  binary="$dir/notunual"
+  [ -x "$binary" ] || die "Binary not found: $binary (build first)"
+  mkdir -p "$DIST"
+  cp "$binary" "$DIST/$APP-$VERSION-linux-$arch.bin"
+  echo "==> $DIST/$APP-$VERSION-linux-$arch.bin"
+}
+
+linux_source() {
+  mkdir -p "$DIST"
+  ( cd "$ROOT" && git archive --format=tar.gz --prefix="$APP-$VERSION/" \
+      -o "$DIST/$APP-$VERSION-source.tar.gz" HEAD )
+  echo "==> $DIST/$APP-$VERSION-source.tar.gz"
+}
+
+# =====================================================================
+# Dispatch
+# =====================================================================
+build_target() {
+  local os="$1" fmt="$2" archsel="${3:-all}" archs a
+  local formats=() need_bundle=no bundle_list=""
+
+  [ "$os" = "linux" ] || die "Unknown OS: $os (this project ships Linux only)."
+  if [ "$archsel" = "all" ]; then
+    archs="$ARCHS_DEFAULT"
+  else
+    archs="$archsel"
+  fi
+  for a in $archs; do
+    target_triple "$a" >/dev/null
+  done
+
+  case "$fmt" in
+    all) formats=(appimage targz rpm source) ;;
+    appimage|targz|rpm|source|binary) formats=("$fmt") ;;
+    *) die "Unknown format: $fmt (valid: appimage | targz | rpm | source | binary | all)" ;;
+  esac
+
+  for a in $archs; do
+    banner
+    echo "Target: linux $fmt ($a) version=$VERSION"
+    echo
+
+    local needs_appimage=no needs_rpm=no needs_binary=no
+    for f in "${formats[@]}"; do
+      case "$f" in
+        appimage) needs_appimage=yes ;;
+        rpm) needs_rpm=yes ;;
+        targz|binary) needs_binary=yes ;;
+      esac
+    done
+
+    if [ "$needs_appimage" = "yes" ] || [ "$needs_rpm" = "yes" ]; then
+      [ "$needs_appimage" = "yes" ] && bundle_list="appimage"
+      [ "$needs_rpm" = "yes" ] && bundle_list="${bundle_list:+$bundle_list,}rpm"
+      [ "$needs_rpm" = "yes" ] && ensure_rpm_tool
+      build_with_tauri "$a" "$bundle_list" no
+    elif [ "$needs_binary" = "yes" ]; then
+      build_with_tauri "$a" - yes
+    fi
+
+    for f in "${formats[@]}"; do
+      case "$f" in
+        appimage) collect_appimage "$a" ;;
+        rpm) collect_rpm "$a" ;;
+        targz) linux_targz "$a" ;;
+        binary) linux_binary "$a" ;;
+        source) linux_source ;;
+      esac
+    done
+  done
+
+  # Checksums for every asset in build/dist
+  mkdir -p "$DIST"
+  ( cd "$DIST" && rm -f SHA256SUMS && sha256sum -- * > SHA256SUMS )
+  echo
+  echo "Done. Assets are in build/dist/ (SHA256SUMS included)."
+}
+
+interactive() {
+  local os="linux" fmt
+  banner
+  echo
+  echo "Select package format:"
+  select c in "All (AppImage, tar.gz, rpm, source)" "AppImage" "tar.gz" "rpm" "Source code" "Binary only" "Cancel"; do
+    case "$REPLY" in
+      1) fmt="all"; break ;;
+      2) fmt="appimage"; break ;;
+      3) fmt="targz"; break ;;
+      4) fmt="rpm"; break ;;
+      5) fmt="source"; break ;;
+      6) fmt="binary"; break ;;
+      7|"") echo "Cancelled."; exit 0 ;;
+      *) echo "Invalid choice." ;;
+    esac
+  done
+  build_target "$os" "$fmt" all
+}
+
+build_main() {
+  case "${1:-}" in
+    "") interactive ;;
+    -h|--help|help) usage ;;
+    -l|--list|list) list_targets ;;
+    linux)
+      [ $# -ge 2 ] || { echo "Format missing."; list_targets; exit 1; }
+      build_target "$1" "$2" "${3:-all}"
+      ;;
+    *) echo "Unknown command: $1"; echo; usage; exit 1 ;;
+  esac
+}
+
+# ---- entry point ----
+case "${1:-}" in
+  --build)     shift; build_main "$@" ;;
+  --install)   do_install ;;
+  --uninstall) do_uninstall ;;
+  --list|-l|list) list_targets ;;
+  --help|-h|help) usage ;;
+  *)           run_app "$@" ;;   # "./notunual" (+ any app arguments)
+esac

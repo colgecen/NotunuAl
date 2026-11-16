@@ -3,6 +3,7 @@ name = "notunual"
 version = "0.1.0"
 description = "NotunuAl!"
 authors = ["NotunuAl"]
+license = "MIT"
 edition = "2021"
 
 [lib]

@@ -1,8 +1,10 @@
 node_modules
 dist
+build
 src-tauri/target
 src-tauri/gen
 .env
 .DS_Store
 playwright-report
 test-results
+scripts/.make_screenshots.tmp.mjs
