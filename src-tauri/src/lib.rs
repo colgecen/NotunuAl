@@ -72,6 +72,12 @@ fn register_appimage_desktop_entry() {
     .arg("-t")
     .arg(&icon_root)
     .status();
+  let _ = Command::new("kbuildsycoca6")
+    .arg("--noincremental")
+    .status();
+  let _ = Command::new("kbuildsycoca5")
+    .arg("--noincremental")
+    .status();
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
